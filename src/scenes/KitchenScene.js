@@ -4,6 +4,7 @@ import { InputManager } from '../systems/InputManager.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import dialogueData from '../data/dialogue.json';
 
 export class KitchenScene extends Phaser.Scene {
@@ -20,7 +21,10 @@ export class KitchenScene extends Phaser.Scene {
     this.transition = new TransitionManager(this);
     this.dialogue = new DialogueSystem(this);
     this.save = new SaveSystem();
+    this.audio = new ProceduralAudio(this);
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(500);
+    this.audio.playMusic('kitchen');
 
     const { width, height } = this.cameras.main;
 
@@ -157,6 +161,7 @@ export class KitchenScene extends Phaser.Scene {
     this.player.setVelocity(0);
     this.gameFlags.banana = true;
     if (this.fridgeLabel) this.fridgeLabel.setVisible(false);
+    this.audio.playFanfare();
 
     this.dialogue.startSequence(dialogueData.kitchen.banana, {
       onComplete: () => {
@@ -171,6 +176,7 @@ export class KitchenScene extends Phaser.Scene {
     this.player.setVelocity(0);
     this.gameFlags.coffee = true;
     if (this.coffeeLabel) this.coffeeLabel.setVisible(false);
+    this.audio.playFanfare();
 
     // Steam particles
     const emitter = this.add.particles(this.coffeeMachine.x, this.coffeeMachine.y - 20, 'coffee-cup', {

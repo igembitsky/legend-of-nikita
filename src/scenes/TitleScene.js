@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 
 export class TitleScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +12,17 @@ export class TitleScene extends Phaser.Scene {
     this.transition = new TransitionManager(this);
     this.transition.fadeIn(800);
     this.save = new SaveSystem();
+    this.audio = new ProceduralAudio(this);
+
+    // Resume AudioContext on first interaction (browser autoplay policy)
+    this.input.keyboard.once('keydown', () => {
+      if (this.sound.context.state === 'suspended') {
+        this.sound.context.resume();
+      }
+    });
+
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
+    this.audio.playMusic('title');
 
     const { width, height } = this.cameras.main;
 
@@ -147,6 +159,7 @@ export class TitleScene extends Phaser.Scene {
   }
 
   _select() {
+    this.audio.playConfirm();
     const item = this.menuItems[this.selectedIndex];
     if (item.action === 'continue') {
       const saveData = this.save.load();

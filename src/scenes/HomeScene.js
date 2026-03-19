@@ -4,6 +4,7 @@ import { InputManager } from '../systems/InputManager.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import dialogueData from '../data/dialogue.json';
 
 export class HomeScene extends Phaser.Scene {
@@ -20,7 +21,10 @@ export class HomeScene extends Phaser.Scene {
     this.transition = new TransitionManager(this);
     this.dialogue = new DialogueSystem(this);
     this.save = new SaveSystem();
+    this.audio = new ProceduralAudio(this);
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(500);
+    this.audio.playMusic('home');
 
     const { width, height } = this.cameras.main;
 
@@ -125,6 +129,7 @@ export class HomeScene extends Phaser.Scene {
     this.frozen = true;
     this.player.setVelocity(0);
     this.bowlLabel.setVisible(false);
+    this.audio.playMeow();
 
     // Heart particles
     for (let i = 0; i < 8; i++) {
@@ -153,6 +158,9 @@ export class HomeScene extends Phaser.Scene {
 
   _startEnding() {
     const { width, height } = this.cameras.main;
+
+    // Stop music as lights dim
+    this.audio.stopMusic();
 
     // Dim lights
     const darkness = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0)

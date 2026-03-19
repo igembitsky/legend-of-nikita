@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { TransitionManager } from '../systems/TransitionManager.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import dialogueData from '../data/dialogue.json';
 
 export class IntroCrawlScene extends Phaser.Scene {
@@ -10,6 +11,9 @@ export class IntroCrawlScene extends Phaser.Scene {
   create() {
     this.transition = new TransitionManager(this);
     this.transition.fadeIn(500);
+    this.audio = new ProceduralAudio(this);
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
+    this.audio.playMusic('crawl');
 
     const { width, height } = this.cameras.main;
 
@@ -102,6 +106,7 @@ export class IntroCrawlScene extends Phaser.Scene {
   _endCrawl() {
     if (this.crawlComplete) return;
     this.crawlComplete = true;
+    this.audio.stopMusic();
     this.transition.fadeToScene('BedroomScene');
   }
 }

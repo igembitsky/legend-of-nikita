@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { TransitionManager } from '../systems/TransitionManager.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 
 export class BirthdayScene extends Phaser.Scene {
   constructor() {
@@ -8,7 +9,10 @@ export class BirthdayScene extends Phaser.Scene {
 
   create() {
     this.transition = new TransitionManager(this);
+    this.audio = new ProceduralAudio(this);
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(1000);
+    this.audio.playMusic('birthday');
 
     const { width, height } = this.cameras.main;
 
@@ -80,6 +84,7 @@ export class BirthdayScene extends Phaser.Scene {
       delay: 800,
       loop: true,
       callback: () => {
+        this.audio.playFirework();
         const x = Phaser.Math.Between(100, width - 100);
         const y = Phaser.Math.Between(50, height * 0.4);
         const color = Phaser.Math.RND.pick([0xff4444, 0x44ff44, 0x4444ff, 0xffcc00, 0xff44ff, 0x44ffff]);

@@ -4,6 +4,7 @@ import { InputManager } from '../systems/InputManager.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import dialogueData from '../data/dialogue.json';
 
 export class BedroomScene extends Phaser.Scene {
@@ -20,7 +21,10 @@ export class BedroomScene extends Phaser.Scene {
     this.transition = new TransitionManager(this);
     this.dialogue = new DialogueSystem(this);
     this.save = new SaveSystem();
+    this.audio = new ProceduralAudio(this);
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(500);
+    this.audio.playMusic('bedroom');
 
     const { width, height } = this.cameras.main;
 
@@ -132,11 +136,13 @@ export class BedroomScene extends Phaser.Scene {
     // Input for dialogue advance
     this.input.keyboard.on('keydown-SPACE', () => {
       if (this.dialogue.isActive()) {
+        this.audio.playBlip();
         this.dialogue.advance();
       }
     });
     this.input.keyboard.on('keydown-ENTER', () => {
       if (this.dialogue.isActive()) {
+        this.audio.playBlip();
         this.dialogue.advance();
       }
     });
@@ -205,6 +211,7 @@ export class BedroomScene extends Phaser.Scene {
   _failStealth() {
     this.frozen = true;
     this.player.setVelocity(0);
+    this.audio.playAlarm();
     this.transition.flash(300, 255, 100, 100);
     const msgs = dialogueData.bedroom.failMessages || dialogueData.bedroom.fail;
     const msg = msgs[Math.floor(Math.random() * msgs.length)];
@@ -223,6 +230,7 @@ export class BedroomScene extends Phaser.Scene {
     this.dressed = true;
     this.gameFlags.dressed = true;
     this.player.setTexture('nikita-dressed');
+    this.audio.playFanfare();
     this.closetIndicator.setVisible(false);
 
     this.dialogue.startSequence(dialogueData.bedroom.dressed, {

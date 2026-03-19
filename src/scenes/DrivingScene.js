@@ -4,6 +4,7 @@ import { InputManager } from '../systems/InputManager.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import dialogueData from '../data/dialogue.json';
 
 export class DrivingScene extends Phaser.Scene {
@@ -22,7 +23,10 @@ export class DrivingScene extends Phaser.Scene {
     this.transition = new TransitionManager(this);
     this.dialogue = new DialogueSystem(this);
     this.save = new SaveSystem();
+    this.audio = new ProceduralAudio(this);
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(500);
+    this.audio.playMusic('driving');
 
     const { width, height } = this.cameras.main;
 
@@ -225,6 +229,7 @@ export class DrivingScene extends Phaser.Scene {
 
   _crash() {
     this.crashed = true;
+    this.audio.playCrash();
     this.transition.flash(300, 255, 100, 0);
 
     // Random crash message

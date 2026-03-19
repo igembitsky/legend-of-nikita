@@ -3,6 +3,7 @@ import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import dialogueData from '../data/dialogue.json';
 
 export class DojoScene extends Phaser.Scene {
@@ -18,7 +19,10 @@ export class DojoScene extends Phaser.Scene {
     this.transition = new TransitionManager(this);
     this.dialogue = new DialogueSystem(this);
     this.save = new SaveSystem();
+    this.audio = new ProceduralAudio(this);
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(500);
+    this.audio.playMusic('dojo');
 
     const { width, height } = this.cameras.main;
 
@@ -73,6 +77,7 @@ export class DojoScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-ENTER', () => {
       if (this.dialogue.isActive()) {
         if (this.dialogue.hasChoices()) {
+          this.audio.playConfirm();
           this.dialogue.confirmChoice();
         } else {
           this.dialogue.advance();
@@ -147,6 +152,7 @@ export class DojoScene extends Phaser.Scene {
 
   _executeMove() {
     const selectedMove = this.dialogue.getSelectedChoice();
+    this.audio.playHit();
 
     // Show selected move name
     const moveText = this.add.text(

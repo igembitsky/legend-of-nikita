@@ -3,6 +3,7 @@ import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
+import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import dialogueData from '../data/dialogue.json';
 
 export class OfficeScene extends Phaser.Scene {
@@ -18,7 +19,10 @@ export class OfficeScene extends Phaser.Scene {
     this.transition = new TransitionManager(this);
     this.dialogue = new DialogueSystem(this);
     this.save = new SaveSystem();
+    this.audio = new ProceduralAudio(this);
+    this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(500);
+    this.audio.playMusic('office');
 
     const { width, height } = this.cameras.main;
 
@@ -278,6 +282,7 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   _startPanic() {
+    this.audio.playAlarm();
     // Red overlay pulse
     this.tweens.add({
       targets: this.redOverlay,
@@ -308,6 +313,10 @@ export class OfficeScene extends Phaser.Scene {
 
   _moneyRain() {
     const { width, height } = this.cameras.main;
+
+    // Money SFX on interval
+    const moneyInterval = setInterval(() => this.audio.playMoney(), 400);
+    this.time.delayedCall(3800, () => clearInterval(moneyInterval));
 
     for (let i = 0; i < 30; i++) {
       const money = this.add.sprite(
