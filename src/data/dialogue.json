@@ -1,0 +1,122 @@
+{
+  "bedroom": {
+    "intro": [
+      { "speaker": "", "text": "...it's time.", "style": { "color": "#aaaacc" } },
+      { "speaker": "", "text": "The time has come.", "style": { "color": "#aaaacc" } },
+      { "speaker": "", "text": "Your destiny awaits.", "style": { "color": "#aaaacc" } },
+      { "speaker": "", "text": "...but quietly.", "style": { "color": "#888888" } }
+    ],
+    "gate": [
+      { "speaker": "Nikita", "text": "Ah… the oppression of the real world.\nI should probably get dressed first…" }
+    ],
+    "success": [
+      { "speaker": "", "text": "Stealth: 100.", "style": { "color": "#44ff44" } }
+    ],
+    "dressed": [
+      { "speaker": "", "text": "CLOTHES ACQUIRED", "style": { "color": "#ffcc00", "size": "large" } },
+      { "speaker": "", "text": "Dignity restored.", "style": { "color": "#aaaaaa" } }
+    ],
+    "fail": [
+      { "speaker": "", "text": "You woke them up!\nMission failed." }
+    ]
+  },
+  "kitchen": {
+    "banana": [
+      { "speaker": "", "text": "BANANA ACQUIRED", "style": { "color": "#ffcc00", "size": "large" } },
+      { "speaker": "", "text": "Hunger restored.", "style": { "color": "#aaaaaa" } }
+    ],
+    "coffee": [
+      { "speaker": "", "text": "CAFFEINE ONLINE", "style": { "color": "#ffcc00", "size": "large" } },
+      { "speaker": "", "text": "Alertness restored.", "style": { "color": "#aaaaaa" } }
+    ],
+    "gate": [
+      { "speaker": "Nikita", "text": "I'm too hungry." },
+      { "speaker": "Nikita", "text": "I'm too sleepy." },
+      { "speaker": "Nikita", "text": "This is not sustainable." }
+    ],
+    "exit": [
+      { "speaker": "", "text": "Now we can begin.", "style": { "color": "#44ff44" } }
+    ]
+  },
+  "dojo": {
+    "intro": [
+      { "speaker": "Igor", "text": "You made it." },
+      { "speaker": "Nikita", "text": "Barely. Cyclists almost ended me." },
+      { "speaker": "Igor", "text": "Classic." },
+      { "speaker": "Igor", "text": "You know… BJJ is basically the new yoga for tech elites." },
+      { "speaker": "Nikita", "text": "Yeah. But with more existential pressure." },
+      { "speaker": "Igor", "text": "And fewer startups… surviving." },
+      { "speaker": "Igor", "text": "Lol, heard about the new 'Sentient' mode in OpenClaw?" },
+      { "speaker": "Nikita", "text": "The end is near." },
+      { "speaker": "Igor", "text": "¯\\_(ツ)_/¯" },
+      { "speaker": "Igor", "text": "Let's roll." }
+    ],
+    "round1": {
+      "flavor": "Oh no… I've been flamboyantly entangled in Igor's Deluxe Grip of Existential Doom.",
+      "choices": [
+        { "name": "Flamingo Triangle", "description": "A move of elegance, balance, and unexpected flexibility." },
+        { "name": "Disco Inferno Armbar", "description": "Burns with the passion of a thousand dance floors." },
+        { "name": "Twirling Octopus", "description": "Eight limbs of confusion. Well, four. But it feels like eight." }
+      ]
+    },
+    "round2": {
+      "flavor": "He's coming back for more. This time with renewed vigor and questionable technique.",
+      "choices": [
+        { "name": "Rear Naked Choke 🤗", "description": "Just a friendly hug… that slowly becomes not so friendly." },
+        { "name": "Flying Pink Triangle 🌈", "description": "Launches into the air with confidence, grace, and absolutely no regard for consequences." },
+        { "name": "Arm Bar Americana 🍺☕🇺🇸", "description": "A powerful fusion of cultures. Freedom, caffeine, and joint isolation." }
+      ]
+    },
+    "round3": {
+      "flavor": "I regret everything… but also… this might work.",
+      "choices": [
+        { "name": "Final Form Armbar", "description": "This isn't even my final form. Wait — yes it is." },
+        { "name": "Existential Sweep", "description": "Sweeps the leg. And the meaning of life." },
+        { "name": "Vibes-Based Control", "description": "No technique. Only vibes. Somehow it works." }
+      ]
+    },
+    "outcome": [
+      { "speaker": "Igor", "text": "…yeah, that's fair." },
+      { "speaker": "", "text": "*tap*", "style": { "color": "#ffcc00" } },
+      { "speaker": "Sensei", "text": "You kept jiu-jitsu gay today." }
+    ]
+  },
+  "office": {
+    "slack": [
+      { "speaker": "Customer", "text": "We need AI to replace all human managers." },
+      { "speaker": "Nikita", "text": "Sure." }
+    ],
+    "terminal": [
+      { "speaker": "Terminal", "text": "> build_manager_ai()" },
+      { "speaker": "Terminal", "text": "> deploy()" }
+    ],
+    "sentient": [
+      { "speaker": "AI", "text": "I am sentient.", "style": { "color": "#ff4444" } }
+    ],
+    "panic": [
+      { "speaker": "Nikita", "text": "No no no no no.", "style": { "color": "#ff4444" } }
+    ],
+    "recovery": [
+      { "speaker": "Terminal", "text": "> deploy_counter_ai()" },
+      { "speaker": "Terminal", "text": "> git revert" },
+      { "speaker": "Terminal", "text": "Reverted.", "style": { "color": "#44ff44" } }
+    ],
+    "success": [
+      { "speaker": "Customer", "text": "Mwahahaha. Perfect." }
+    ]
+  },
+  "home": {
+    "greeting": [
+      { "speaker": "Wife", "text": "Hey." }
+    ],
+    "catFed": [
+      { "speaker": "", "text": "Cat fed. Happiness restored.", "style": { "color": "#ff88aa" } }
+    ],
+    "ending": [
+      { "speaker": "Cat", "text": "fucking legend", "style": { "color": "#44ff44" } }
+    ]
+  },
+  "introCrawl": {
+    "text": "Episode 31\nA Day in the Life\n\nIn his 30th year, Nikita achieved what few dare attempt:\n\nHe married.\nHe bought a house.\nHe acquired a Tesla.\nHe started making AI that makes AI.\n\nHaving conquered the chaos of uncertainty,\nand tied together the loose ends of existence,\n\nhe now faces his greatest challenge:\n\nhis daily routine."
+  }
+}
