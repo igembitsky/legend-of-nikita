@@ -6,6 +6,7 @@ import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import { AtmosphereManager } from '../systems/AtmosphereManager.js';
+import { RoomRenderer } from '../systems/RoomRenderer.js';
 import dialogueData from '../data/dialogue.json';
 
 export class BedroomScene extends Phaser.Scene {
@@ -30,21 +31,27 @@ export class BedroomScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
 
-    // Room background — dark blue/purple tint
-    this.add.rectangle(width / 2, height / 2, width, height, 0x1a1a2e);
+    // Rich wood floor
+    RoomRenderer.drawWoodFloor(this, width, height, {
+      baseColor: 0x4a3020, variation: 12, plankHeight: 44, gapColor: 0x2a1a08,
+    });
 
-    // Floor tiles
-    for (let x = 0; x < width; x += 48) {
-      for (let y = 0; y < height; y += 48) {
-        const shade = (Math.floor(x / 48) + Math.floor(y / 48)) % 2 === 0 ? 0x222244 : 0x1e1e3e;
-        this.add.rectangle(x + 24, y + 24, 48, 48, shade);
-      }
-    }
+    // Textured walls with wallpaper
+    RoomRenderer.drawWalls(this, width, height, {
+      wallColor: 0x2a2244, patternColor: 0x332255,
+      baseboardColor: 0x3a2a18, wallThickness: 48,
+    });
 
-    // Walls
-    this.add.rectangle(width / 2, 16, width, 32, 0x333366);
-    this.add.rectangle(16, height / 2, 32, height, 0x333366);
-    this.add.rectangle(width - 16, height / 2, 32, height, 0x333366);
+    // Window on right wall with moonlight
+    RoomRenderer.drawWindow(this, width - 48, 200, 70, 90, {
+      glassColor: 0x1a2a4a, lightColor: 0x4466aa,
+      lightRadius: 160, lightAlpha: 0.06, curtainColor: 0x2a3366,
+    });
+
+    // Rug between bed and door area
+    RoomRenderer.drawRug(this, width / 2, height / 2 + 60, 220, 140, {
+      color: 0x3a2244, borderColor: 0x2a1a33, patternColor: 0x4a3355,
+    });
 
     // Bed (top-left area)
     this.bed = this.physics.add.staticImage(200, 180, 'bed');
@@ -108,6 +115,24 @@ export class BedroomScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(300, 350, 'nikita-pajamas');
     this.player.setCollideWorldBounds(true);
     this.playerSpeed = 120;
+
+    // Depth sorting for furniture and player
+    this.bed.setDepth(10);
+    this.closet.setDepth(10);
+    this.door.setDepth(10);
+    this.player.setDepth(50);
+
+    // Shadows under furniture
+    RoomRenderer.drawShadow(this, 200, 220, 130, 25);  // under bed
+    RoomRenderer.drawShadow(this, this.closet.x, this.closet.y + 30, 50, 15);  // under closet
+
+    // Nightstand with lamp (next to bed)
+    this.add.sprite(310, 170, 'nightstand').setDepth(10);
+    RoomRenderer.drawShadow(this, 310, 195, 34, 10);
+
+    // Plant in corner
+    this.add.sprite(80, height - 80, 'plant').setDepth(10);
+    RoomRenderer.drawShadow(this, 80, height - 58, 26, 8);
 
     // Wake zone visuals (pulsing circles)
     this.wifeGlow = this.add.circle(220, 170, 48, 0xff4444, 0.05);

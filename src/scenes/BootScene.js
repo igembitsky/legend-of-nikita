@@ -170,6 +170,8 @@ export class BootScene extends Phaser.Scene {
     // Props
     this._drawCharacter('closet', (g) => this._drawCloset(g), 48, 64);
     this._drawCharacter('door', (g) => this._drawDoor(g), 40, 48);
+    this._drawCharacter('nightstand', (g) => this._drawNightstand(g), 32, 40);
+    this._drawCharacter('plant', (g) => this._drawPlant(g), 24, 40);
     this._drawCharacter('fridge', (g) => this._drawFridge(g), 48, 64);
     this._drawCharacter('coffee-machine', (g) => this._drawCoffeeMachine(g), 32, 40);
     this._drawCharacter('food-bowl', (g) => this._drawFoodBowl(g), 24, 16);
@@ -1561,6 +1563,59 @@ export class BootScene extends Phaser.Scene {
     g.fillRect(13, 1, 2, 2);
     g.fillRect(1, 13, 2, 2);
     g.fillRect(13, 13, 2, 2);
+  }
+
+  _drawNightstand(g) {
+    // Table legs
+    g.fillStyle(0x5a3a20);
+    g.fillRect(2, 28, 4, 12);
+    g.fillRect(26, 28, 4, 12);
+    // Table body
+    g.fillStyle(0x6a4a30);
+    g.fillRect(0, 10, 32, 20);
+    // Drawer
+    g.fillStyle(0x5a3a20);
+    g.fillRect(4, 15, 24, 10);
+    // Drawer handle
+    g.fillStyle(0xccaa44);
+    g.fillRect(14, 19, 4, 2);
+    // Table top
+    g.fillStyle(0x7a5a40);
+    g.fillRect(0, 8, 32, 4);
+    // Lamp base
+    g.fillStyle(0x888888);
+    g.fillRect(12, 2, 8, 6);
+    // Lamp shade
+    g.fillStyle(0xffdd88);
+    g.fillRect(8, 0, 16, 4);
+    // Lamp glow
+    g.fillStyle(0xffeeaa, 0.3);
+    g.fillRect(4, 0, 24, 8);
+  }
+
+  _drawPlant(g) {
+    // Pot
+    g.fillStyle(0x8b5a3a);
+    g.fillRect(6, 24, 12, 16);
+    g.fillRect(4, 24, 16, 4);
+    // Pot rim
+    g.fillStyle(0x9b6a4a);
+    g.fillRect(3, 22, 18, 4);
+    // Soil
+    g.fillStyle(0x3a2a1a);
+    g.fillRect(6, 22, 12, 4);
+    // Leaves
+    g.fillStyle(0x2a6a2a);
+    g.fillRect(8, 10, 8, 12);
+    g.fillRect(4, 14, 6, 8);
+    g.fillRect(14, 12, 6, 8);
+    g.fillStyle(0x3a8a3a);
+    g.fillRect(10, 6, 4, 8);
+    g.fillRect(6, 8, 4, 6);
+    g.fillRect(14, 10, 4, 6);
+    // Stem
+    g.fillStyle(0x2a5a2a);
+    g.fillRect(11, 14, 2, 10);
   }
 
   _drawBed(g) {
