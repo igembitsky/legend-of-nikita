@@ -1,0 +1,51 @@
+{
+  "sprites": [
+    "nikita-pajamas.png",
+    "nikita-dressed.png",
+    "nikita-gi.png",
+    "wife-sleeping.png",
+    "wife-awake.png",
+    "wife-standing.png",
+    "cat.png",
+    "igor.png",
+    "sensei.png",
+    "tesla.png",
+    "cyclist.png",
+    "car.png",
+    "office-npc.png",
+    "office-robot.png",
+    "dojo-pair.png"
+  ],
+  "tilesets": [
+    "bedroom.png",
+    "kitchen.png",
+    "road.png",
+    "dojo.png",
+    "office.png",
+    "home.png"
+  ],
+  "props": [
+    "banana.png",
+    "coffee.png",
+    "closet.png",
+    "door.png",
+    "fridge.png",
+    "coffee-machine.png",
+    "food-bowl.png",
+    "terminal.png",
+    "slack-notification.png",
+    "money.png",
+    "firework.png",
+    "balloon.png",
+    "confetti.png",
+    "photo-frame.png"
+  ],
+  "ui": [
+    "dialogue-box.png",
+    "choice-menu.png",
+    "item-popup.png",
+    "loading-bar.png",
+    "pause-overlay.png",
+    "hud-icons.png"
+  ]
+}
