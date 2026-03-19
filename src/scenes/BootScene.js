@@ -40,8 +40,92 @@ export class BootScene extends Phaser.Scene {
   create() {
     // Generate pixel art textures for development
     this._generateSprites();
+    this._generateUITextures();
 
     this.scene.start('TitleScene');
+  }
+
+  _generateUITextures() {
+    // 'ui-dialogue-frame' (48x48) — nine-slice source for dialogue box border
+    if (!this.textures.exists('ui-dialogue-frame')) {
+      const g = this.make.graphics({ add: false });
+      // Interior dark navy gradient (4 horizontal bands)
+      g.fillStyle(0x0c0c28); g.fillRect(4, 4, 40, 10);
+      g.fillStyle(0x0f0f32); g.fillRect(4, 14, 40, 10);
+      g.fillStyle(0x121240); g.fillRect(4, 24, 40, 10);
+      g.fillStyle(0x161640); g.fillRect(4, 34, 40, 10);
+      // 4px outer border (dark blue)
+      g.fillStyle(0x1a1a55);
+      g.fillRect(0, 0, 48, 4);   // top
+      g.fillRect(0, 44, 48, 4);  // bottom
+      g.fillRect(0, 0, 4, 48);   // left
+      g.fillRect(44, 0, 4, 48);  // right
+      // 2px inner highlight line (lighter blue)
+      g.fillStyle(0x3355aa);
+      g.fillRect(4, 4, 40, 2);   // top inner
+      g.fillRect(4, 42, 40, 2);  // bottom inner
+      g.fillRect(4, 4, 2, 40);   // left inner
+      g.fillRect(42, 4, 2, 40);  // right inner
+      // 6x6 gold corner ornaments
+      g.fillStyle(0xccaa44);
+      g.fillRect(0, 0, 6, 6);    // top-left
+      g.fillRect(42, 0, 6, 6);   // top-right
+      g.fillRect(0, 42, 6, 6);   // bottom-left
+      g.fillRect(42, 42, 6, 6);  // bottom-right
+      // 2px gold accent lines from corners (8px long)
+      g.fillRect(6, 2, 8, 2);    // top-left horizontal
+      g.fillRect(2, 6, 2, 8);    // top-left vertical
+      g.fillRect(34, 2, 8, 2);   // top-right horizontal
+      g.fillRect(44, 6, 2, 8);   // top-right vertical
+      g.fillRect(6, 44, 8, 2);   // bottom-left horizontal
+      g.fillRect(2, 34, 2, 8);   // bottom-left vertical
+      g.fillRect(34, 44, 8, 2);  // bottom-right horizontal
+      g.fillRect(44, 34, 2, 8);  // bottom-right vertical
+      g.generateTexture('ui-dialogue-frame', 48, 48);
+      g.destroy();
+    }
+
+    // 'ui-speaker-tab' (32x20)
+    if (!this.textures.exists('ui-speaker-tab')) {
+      const g = this.make.graphics({ add: false });
+      // Dark fill
+      g.fillStyle(0x0c0c28); g.fillRect(2, 2, 28, 16);
+      // Blue border
+      g.fillStyle(0x1a1a55);
+      g.fillRect(0, 0, 32, 2);
+      g.fillRect(0, 18, 32, 2);
+      g.fillRect(0, 0, 2, 20);
+      g.fillRect(30, 0, 2, 20);
+      // Gold corner accents
+      g.fillStyle(0xccaa44);
+      g.fillRect(0, 0, 4, 4);
+      g.fillRect(28, 0, 4, 4);
+      g.fillRect(0, 16, 4, 4);
+      g.fillRect(28, 16, 4, 4);
+      g.generateTexture('ui-speaker-tab', 32, 20);
+      g.destroy();
+    }
+
+    // 'ui-portrait-frame' (72x72)
+    if (!this.textures.exists('ui-portrait-frame')) {
+      const g = this.make.graphics({ add: false });
+      // Dark interior fill
+      g.fillStyle(0x0a0a20); g.fillRect(4, 4, 64, 64);
+      // 4px outer border (blue)
+      g.fillStyle(0x3355aa);
+      g.fillRect(0, 0, 72, 4);
+      g.fillRect(0, 68, 72, 4);
+      g.fillRect(0, 0, 4, 72);
+      g.fillRect(68, 0, 4, 72);
+      // Gold inner highlight lines
+      g.fillStyle(0xccaa44);
+      g.fillRect(4, 4, 64, 2);
+      g.fillRect(4, 66, 64, 2);
+      g.fillRect(4, 4, 2, 64);
+      g.fillRect(66, 4, 2, 64);
+      g.generateTexture('ui-portrait-frame', 72, 72);
+      g.destroy();
+    }
   }
 
   _drawCharacter(key, drawFn, width, height) {

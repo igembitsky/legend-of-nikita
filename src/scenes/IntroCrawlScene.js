@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
+import { AtmosphereManager } from '../systems/AtmosphereManager.js';
 import dialogueData from '../data/dialogue.json';
 
 export class IntroCrawlScene extends Phaser.Scene {
@@ -11,6 +12,7 @@ export class IntroCrawlScene extends Phaser.Scene {
   create() {
     this.transition = new TransitionManager(this);
     this.transition.fadeIn(500);
+    AtmosphereManager.apply(this, 'crawl');
     this.audio = new ProceduralAudio(this);
     this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.audio.playMusic('crawl');

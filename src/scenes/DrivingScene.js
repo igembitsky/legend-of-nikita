@@ -5,6 +5,7 @@ import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
+import { AtmosphereManager } from '../systems/AtmosphereManager.js';
 import dialogueData from '../data/dialogue.json';
 
 export class DrivingScene extends Phaser.Scene {
@@ -26,6 +27,7 @@ export class DrivingScene extends Phaser.Scene {
     this.audio = new ProceduralAudio(this);
     this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(500);
+    AtmosphereManager.apply(this, 'driving');
     this.audio.playMusic('driving');
 
     const { width, height } = this.cameras.main;

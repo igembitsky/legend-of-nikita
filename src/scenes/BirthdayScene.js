@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
+import { AtmosphereManager } from '../systems/AtmosphereManager.js';
 
 export class BirthdayScene extends Phaser.Scene {
   constructor() {
@@ -12,6 +13,7 @@ export class BirthdayScene extends Phaser.Scene {
     this.audio = new ProceduralAudio(this);
     this.events.on('shutdown', () => { this.audio?.destroy(); });
     this.transition.fadeIn(1000);
+    AtmosphereManager.apply(this, 'birthday');
     this.audio.playMusic('birthday');
 
     const { width, height } = this.cameras.main;

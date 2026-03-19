@@ -8,7 +8,13 @@ describe('DialogueSystem', () => {
   beforeEach(() => {
     mockScene = {
       add: {
-        rectangle: vi.fn(() => ({ setOrigin: vi.fn().mockReturnThis(), setScrollFactor: vi.fn().mockReturnThis(), setDepth: vi.fn().mockReturnThis(), destroy: vi.fn() })),
+        rectangle: vi.fn(() => ({
+          setOrigin: vi.fn().mockReturnThis(),
+          setScrollFactor: vi.fn().mockReturnThis(),
+          setDepth: vi.fn().mockReturnThis(),
+          setStrokeStyle: vi.fn().mockReturnThis(),
+          destroy: vi.fn()
+        })),
         text: vi.fn(() => ({
           setOrigin: vi.fn().mockReturnThis(),
           setScrollFactor: vi.fn().mockReturnThis(),
@@ -19,7 +25,16 @@ describe('DialogueSystem', () => {
           destroy: vi.fn(),
           text: '',
         })),
+        sprite: vi.fn(() => ({
+          setDisplaySize: vi.fn().mockReturnThis(),
+          setScrollFactor: vi.fn().mockReturnThis(),
+          setDepth: vi.fn().mockReturnThis(),
+          destroy: vi.fn(),
+        })),
+        // nineslice intentionally undefined — forces fallback to rectangle
       },
+      textures: { exists: vi.fn(() => false) },
+      tweens: { add: vi.fn() },
       time: { addEvent: vi.fn() },
       cameras: { main: { width: 1280, height: 720 } },
     };

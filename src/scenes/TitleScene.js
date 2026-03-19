@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
+import { AtmosphereManager } from '../systems/AtmosphereManager.js';
 
 export class TitleScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +12,7 @@ export class TitleScene extends Phaser.Scene {
   create() {
     this.transition = new TransitionManager(this);
     this.transition.fadeIn(800);
+    AtmosphereManager.apply(this, 'title');
     this.save = new SaveSystem();
     this.audio = new ProceduralAudio(this);
 
