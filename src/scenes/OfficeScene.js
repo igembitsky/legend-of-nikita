@@ -5,6 +5,7 @@ import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import { AtmosphereManager } from '../systems/AtmosphereManager.js';
+import { RoomRenderer } from '../systems/RoomRenderer.js';
 import dialogueData from '../data/dialogue.json';
 
 export class OfficeScene extends Phaser.Scene {
@@ -28,12 +29,33 @@ export class OfficeScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
 
-    // Cyberpunk office background
-    this.add.rectangle(width / 2, height / 2, width, height, 0x0a0a1a);
+    // Dark carpet floor
+    RoomRenderer.drawWoodFloor(this, width, height, {
+      baseColor: 0x1a1a22, variation: 4, plankHeight: 60, gapColor: 0x111118,
+    });
 
-    // Neon accents
-    this.add.rectangle(width / 2, 5, width, 10, 0x00ffcc, 0.3);
-    this.add.rectangle(width / 2, height - 5, width, 10, 0xff00cc, 0.3);
+    // Ceiling area (dark with fluorescent lights)
+    const ceiling = this.add.graphics().setDepth(200);
+    ceiling.fillStyle(0x0a0a15);
+    ceiling.fillRect(0, 0, width, 30);
+
+    // Fluorescent light strips
+    ceiling.fillStyle(0xccddff, 0.4);
+    ceiling.fillRect(200, 5, 120, 8);
+    ceiling.fillRect(500, 5, 120, 8);
+    ceiling.fillRect(800, 5, 120, 8);
+
+    // Neon accent strips (enhanced)
+    const neon = this.add.graphics().setDepth(201);
+    neon.fillStyle(0x00ffcc, 0.4);
+    neon.fillRect(0, 28, width, 3);
+    neon.fillStyle(0xff00cc, 0.3);
+    neon.fillRect(0, height - 3, width, 3);
+
+    // Side neon strips
+    neon.fillStyle(0x00ffcc, 0.15);
+    neon.fillRect(0, 0, 3, height);
+    neon.fillRect(width - 3, 0, 3, height);
 
     // Desks with NPCs
     for (let i = 0; i < 4; i++) {
@@ -64,6 +86,7 @@ export class OfficeScene extends Phaser.Scene {
 
     // Nikita at desk (center)
     this.nikita = this.add.sprite(width / 2, 420, 'nikita-dressed');
+    this.add.ellipse(width / 2, 420 + 22, 24, 8, 0x000000, 0.15).setDepth(1);
     this.add.rectangle(width / 2, 450, 100, 60, 0x333355);
 
     // Terminal overlay (hidden initially)

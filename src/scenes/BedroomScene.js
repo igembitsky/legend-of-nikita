@@ -58,6 +58,7 @@ export class BedroomScene extends Phaser.Scene {
 
     // Wife sleeping on bed
     this.wife = this.add.sprite(220, 170, 'wife-sleeping');
+    this.add.ellipse(220, 170 + 22, 24, 8, 0x000000, 0.15).setDepth(1);
     this.wifeZone = new Phaser.Geom.Circle(220, 170, 48);
 
     // Zzz animation
@@ -115,6 +116,9 @@ export class BedroomScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(300, 350, 'nikita-pajamas');
     this.player.setCollideWorldBounds(true);
     this.playerSpeed = 120;
+
+    // Shadow under player
+    this.playerShadow = this.add.ellipse(this.player.x, this.player.y + 22, 24, 8, 0x000000, 0.2).setDepth(1);
 
     // Depth sorting for furniture and player
     this.bed.setDepth(10);
@@ -190,6 +194,11 @@ export class BedroomScene extends Phaser.Scene {
     if (this.frozen || this.dialogue.isActive()) {
       this.player.setVelocity(0);
       return;
+    }
+
+    // Sync player shadow
+    if (this.playerShadow) {
+      this.playerShadow.setPosition(this.player.x, this.player.y + 22);
     }
 
     // Player movement

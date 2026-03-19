@@ -6,6 +6,7 @@ import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import { AtmosphereManager } from '../systems/AtmosphereManager.js';
+import { RoomRenderer } from '../systems/RoomRenderer.js';
 import dialogueData from '../data/dialogue.json';
 
 export class KitchenScene extends Phaser.Scene {
@@ -30,27 +31,38 @@ export class KitchenScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
 
-    // Kitchen background — warm morning tones
-    this.add.rectangle(width / 2, height / 2, width, height, 0x2a2520);
+    // Ceramic tile floor (warm morning kitchen)
+    RoomRenderer.drawTileFloor(this, width, height, {
+      tileSize: 48, color1: 0xd0c8b0, color2: 0xc4bca8,
+      groutColor: 0xa09880, groutWidth: 2,
+    });
 
-    // Floor tiles
-    for (let x = 0; x < width; x += 48) {
-      for (let y = 0; y < height; y += 48) {
-        const shade = (Math.floor(x / 48) + Math.floor(y / 48)) % 2 === 0 ? 0x3a3530 : 0x342f2a;
-        this.add.rectangle(x + 24, y + 24, 48, 48, shade);
-      }
-    }
+    // Walls (lighter warm tones)
+    RoomRenderer.drawWalls(this, width, height, {
+      wallColor: 0x443830, patternColor: 0x554840,
+      baseboardColor: 0x5a4830, wallThickness: 48,
+      sides: { top: true, left: true, right: true },
+    });
 
-    // Walls
-    this.add.rectangle(width / 2, 16, width, 32, 0x555544);
-    this.add.rectangle(16, height / 2, 32, height, 0x555544);
-    this.add.rectangle(width - 16, height / 2, 32, height, 0x555544);
+    // Window above counter area
+    RoomRenderer.drawWindow(this, width / 2, 30, 80, 50, {
+      glassColor: 0x88aacc, lightColor: 0xffdd88,
+      lightRadius: 120, lightAlpha: 0.06, curtainColor: 0xccbb88,
+    });
 
-    // Counter top
-    this.add.rectangle(width / 2, 60, width - 80, 40, 0x8b7355);
+    // Counter top (enhanced with wood grain)
+    const cg = this.add.graphics().setDepth(10);
+    cg.fillStyle(0x8b7355);
+    cg.fillRect(48, 48, width - 96, 44);
+    cg.fillStyle(0x7a6245, 0.5);
+    cg.fillRect(48, 52, width - 96, 1);
+    cg.fillRect(48, 58, width - 96, 1);
+    cg.fillRect(48, 68, width - 96, 1);
 
     // Fridge (left side)
     this.fridge = this.physics.add.staticImage(150, 100, 'fridge');
+    this.fridge.setDepth(10);
+    RoomRenderer.drawShadow(this, 150, 122, 44, 12);
     if (!this.gameFlags.banana) {
       this.fridgeLabel = this.add.text(150, 60, 'SPACE', {
         fontSize: '10px', color: '#ffcc00', fontFamily: 'monospace',
@@ -60,6 +72,8 @@ export class KitchenScene extends Phaser.Scene {
 
     // Coffee machine (right side)
     this.coffeeMachine = this.physics.add.staticImage(width - 150, 100, 'coffee-machine');
+    this.coffeeMachine.setDepth(10);
+    RoomRenderer.drawShadow(this, width - 150, 122, 44, 12);
     if (!this.gameFlags.coffee) {
       this.coffeeLabel = this.add.text(width - 150, 60, 'SPACE', {
         fontSize: '10px', color: '#ffcc00', fontFamily: 'monospace',
@@ -69,6 +83,7 @@ export class KitchenScene extends Phaser.Scene {
 
     // Door (bottom center)
     this.door = this.physics.add.staticImage(width / 2, height - 50, 'door');
+    this.door.setDepth(10);
     this.add.text(width / 2, height - 20, 'EXIT', {
       fontSize: '10px', color: '#888888', fontFamily: 'monospace',
     }).setOrigin(0.5);
@@ -76,7 +91,11 @@ export class KitchenScene extends Phaser.Scene {
     // Player
     this.player = this.physics.add.sprite(width / 2, height / 2, 'nikita-dressed');
     this.player.setCollideWorldBounds(true);
+    this.player.setDepth(50);
     this.playerSpeed = 140;
+
+    // Shadow under player
+    this.playerShadow = this.add.ellipse(this.player.x, this.player.y + 22, 24, 8, 0x000000, 0.2).setDepth(1);
 
     // HUD
     this.hudText = this.add.text(width - 80, 50, '', {
@@ -117,6 +136,11 @@ export class KitchenScene extends Phaser.Scene {
     if (this.frozen || this.dialogue.isActive()) {
       this.player.setVelocity(0);
       return;
+    }
+
+    // Sync player shadow
+    if (this.playerShadow) {
+      this.playerShadow.setPosition(this.player.x, this.player.y + 22);
     }
 
     // Movement

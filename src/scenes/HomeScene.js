@@ -6,6 +6,7 @@ import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import { AtmosphereManager } from '../systems/AtmosphereManager.js';
+import { RoomRenderer } from '../systems/RoomRenderer.js';
 import dialogueData from '../data/dialogue.json';
 
 export class HomeScene extends Phaser.Scene {
@@ -30,22 +31,46 @@ export class HomeScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
 
-    // Warm evening room
-    this.bg = this.add.rectangle(width / 2, height / 2, width, height, 0x2a2018);
+    // Warm wood floor
+    RoomRenderer.drawWoodFloor(this, width, height, {
+      baseColor: 0x6a4a30, variation: 10, plankHeight: 48, gapColor: 0x3a2a18,
+    });
 
-    // Floor
-    for (let x = 0; x < width; x += 48) {
-      for (let y = 0; y < height; y += 48) {
-        const shade = (Math.floor(x / 48) + Math.floor(y / 48)) % 2 === 0 ? 0x3a3028 : 0x352b22;
-        this.add.rectangle(x + 24, y + 24, 48, 48, shade);
-      }
-    }
+    // Walls (warm cream tones)
+    RoomRenderer.drawWalls(this, width, height, {
+      wallColor: 0x443830, patternColor: 0x4a3e35,
+      baseboardColor: 0x5a4830, wallThickness: 48,
+    });
 
-    // Warm light overlay
-    this.warmLight = this.add.rectangle(width / 2, height / 2, width, height, 0xffaa44, 0.05);
+    // Window with warm evening light
+    RoomRenderer.drawWindow(this, width - 48, 200, 80, 100, {
+      glassColor: 0x664422, lightColor: 0xffaa44,
+      lightRadius: 180, lightAlpha: 0.08, curtainColor: 0x886644,
+    });
+
+    // Warm ambient overlay
+    this.add.rectangle(width / 2, height / 2, width, height, 0xffaa44, 0.04).setDepth(3);
+
+    // Couch
+    const couch = this.add.graphics().setDepth(10);
+    couch.fillStyle(0x554433);
+    couch.fillRoundedRect(100, 300, 160, 60, 8);
+    couch.fillStyle(0x665544);
+    couch.fillRoundedRect(100, 295, 160, 20, 6); // back cushion
+    RoomRenderer.drawShadow(this, 180, 365, 160, 20);
 
     // Wife
     this.wife = this.add.sprite(width * 0.3, height * 0.4, 'wife-standing');
+    this.add.ellipse(width * 0.3, height * 0.4 + 22, 24, 8, 0x000000, 0.15).setDepth(1);
+    this.tweens.add({
+      targets: this.wife,
+      scaleY: { from: 1, to: 1.015 },
+      scaleX: { from: 1, to: 0.99 },
+      yoyo: true,
+      repeat: -1,
+      duration: 2000,
+      ease: 'Sine.easeInOut',
+    });
 
     // Cat near food bowl
     this.cat = this.add.sprite(width * 0.6, height * 0.6, 'cat');
@@ -58,7 +83,11 @@ export class HomeScene extends Phaser.Scene {
     // Player
     this.player = this.physics.add.sprite(width * 0.8, height * 0.8, 'nikita-dressed');
     this.player.setCollideWorldBounds(true);
+    this.player.setDepth(50);
     this.playerSpeed = 130;
+
+    // Shadow under player
+    this.playerShadow = this.add.ellipse(this.player.x, this.player.y + 22, 24, 8, 0x000000, 0.2).setDepth(1);
 
     // State
     this.catFed = false;
@@ -103,6 +132,11 @@ export class HomeScene extends Phaser.Scene {
     if (this.frozen || this.dialogue.isActive()) {
       this.player.setVelocity(0);
       return;
+    }
+
+    // Sync player shadow
+    if (this.playerShadow) {
+      this.playerShadow.setPosition(this.player.x, this.player.y + 22);
     }
 
     if (this.phase === 'explore') {
