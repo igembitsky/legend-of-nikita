@@ -1,5 +1,14 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.js';
+import { TitleScene } from './scenes/TitleScene.js';
+import { IntroCrawlScene } from './scenes/IntroCrawlScene.js';
+import { BedroomScene } from './scenes/BedroomScene.js';
+import { KitchenScene } from './scenes/KitchenScene.js';
+import { DrivingScene } from './scenes/DrivingScene.js';
+import { DojoScene } from './scenes/DojoScene.js';
+import { OfficeScene } from './scenes/OfficeScene.js';
+import { HomeScene } from './scenes/HomeScene.js';
+import { BirthdayScene } from './scenes/BirthdayScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -18,7 +27,18 @@ const config = {
       debug: false,
     },
   },
-  scene: [BootScene],
+  scene: [
+    BootScene,
+    TitleScene,
+    IntroCrawlScene,
+    BedroomScene,
+    KitchenScene,
+    DrivingScene,
+    DojoScene,
+    OfficeScene,
+    HomeScene,
+    BirthdayScene,
+  ],
 };
 
 const game = new Phaser.Game(config);
