@@ -3,6 +3,7 @@ import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { InputManager } from '../systems/InputManager.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
+import { PauseOverlay } from '../systems/PauseOverlay.js';
 import dialogueData from '../data/dialogue.json';
 
 export class KitchenScene extends Phaser.Scene {
@@ -89,9 +90,17 @@ export class KitchenScene extends Phaser.Scene {
     });
 
     this.save.autoSave('KitchenScene', this.gameFlags);
+
+    // Pause overlay
+    this.pauseOverlay = new PauseOverlay(this, () => ({
+      scene: this.scene.key,
+      flags: this.gameFlags,
+      position: this.player ? { x: this.player.x, y: this.player.y } : undefined,
+    }));
   }
 
   update(time, delta) {
+    if (this.pauseOverlay?.isPaused()) return;
     if (this.frozen || this.dialogue.isActive()) {
       this.player.setVelocity(0);
       return;

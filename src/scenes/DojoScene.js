@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
+import { PauseOverlay } from '../systems/PauseOverlay.js';
 import dialogueData from '../data/dialogue.json';
 
 export class DojoScene extends Phaser.Scene {
@@ -92,6 +93,17 @@ export class DojoScene extends Phaser.Scene {
     });
 
     this.save.autoSave('DojoScene', this.gameFlags);
+
+    // Pause overlay
+    this.pauseOverlay = new PauseOverlay(this, () => ({
+      scene: this.scene.key,
+      flags: this.gameFlags,
+      position: undefined,
+    }));
+  }
+
+  update(time, delta) {
+    if (this.pauseOverlay?.isPaused()) return;
   }
 
   _startSparring() {
