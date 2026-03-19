@@ -77,14 +77,21 @@ export class OfficeScene extends Phaser.Scene {
     // Scripted sequence
     this.step = 0;
     this.waitingForInput = false;
+    this.recoveryStage = 0;
 
-    // Start with Slack notification
+    // Start with intro dialogue
     this.time.delayedCall(1000, () => this._nextStep());
 
     this.input.keyboard.on('keydown-ENTER', () => {
       if (this.waitingForInput) {
         this.waitingForInput = false;
-        this._nextStep();
+        // If we're in recovery (step 9), advance recovery stages instead of nextStep
+        if (this.step === 9 && this.recoveryStage > 0 && this.recoveryStage < 3) {
+          this._nextRecoveryStage();
+        } else {
+          this._nextStep();
+        }
+        return;
       }
       if (this.dialogue.isActive()) {
         this.dialogue.advance();
@@ -112,20 +119,25 @@ export class OfficeScene extends Phaser.Scene {
     this.step++;
 
     switch (this.step) {
-      case 1: // Slack notification
+      case 1: // Intro dialogue
+        this.dialogue.startSequence(dialogueData.office.intro, {
+          onComplete: () => { this.time.delayedCall(500, () => this._nextStep()); },
+        });
+        break;
+      case 2: // Slack notification
         this._showSlack();
         break;
-      case 2: // Nikita responds
+      case 3: // Nikita responds
         this.dialogue.startSequence([dialogueData.office.slack[1]], {
           onComplete: () => { this.time.delayedCall(500, () => this._nextStep()); },
         });
         break;
-      case 3: // Terminal opens
+      case 4: // Terminal opens
         this._showTerminal();
         this.terminalText.setText('$ _');
         this.waitingForInput = true;
         break;
-      case 4: // build_manager_ai()
+      case 5: // build_manager_ai()
         this._typeCommand('> build_manager_ai()', () => {
           this._showProgress(() => {
             this._appendTerminal('\nDone.');
@@ -133,7 +145,7 @@ export class OfficeScene extends Phaser.Scene {
           });
         });
         break;
-      case 5: // deploy()
+      case 6: // deploy()
         this._typeCommand('\n> deploy()', () => {
           this._showProgress(() => {
             this._appendTerminal('\nDeploying...');
@@ -141,27 +153,21 @@ export class OfficeScene extends Phaser.Scene {
           });
         });
         break;
-      case 6: // AI is sentient
+      case 7: // AI is sentient
         this._appendTerminal('\n\n> AI: "I am sentient."');
         this.terminalText.setColor('#ff4444');
         this.time.delayedCall(1000, () => this._nextStep());
         break;
-      case 7: // Panic
+      case 8: // Panic
         this._startPanic();
         break;
-      case 8: // Recovery
+      case 9: // Recovery — Enter-driven stages
         this.terminalText.setColor('#00ff88');
         this.redOverlay.setAlpha(0);
-        this._typeCommand('\n\n> deploy_counter_ai()', () => {
-          this._showProgress(() => {
-            this._typeCommand('\n> git revert', () => {
-              this._appendTerminal('\nReverted.');
-              this.time.delayedCall(800, () => this._nextStep());
-            });
-          });
-        });
+        this.recoveryStage = 0;
+        this._nextRecoveryStage();
         break;
-      case 9: // Customer happy
+      case 10: // Customer happy
         this.terminalBg.setVisible(false);
         this.terminalBorder.setVisible(false);
         this.terminalText.setVisible(false);
@@ -169,8 +175,36 @@ export class OfficeScene extends Phaser.Scene {
           onComplete: () => this._nextStep(),
         });
         break;
-      case 10: // Money rain
+      case 11: // Closing dialogue
+        this.dialogue.startSequence(dialogueData.office.closing, {
+          onComplete: () => this._nextStep(),
+        });
+        break;
+      case 12: // Money rain
         this._moneyRain();
+        break;
+    }
+  }
+
+  _nextRecoveryStage() {
+    this.recoveryStage++;
+    switch (this.recoveryStage) {
+      case 1:
+        this._typeCommand('\n\n> deploy_counter_ai()', () => {
+          this._showProgress(() => {
+            this._appendTerminal('\nDone.');
+            this.waitingForInput = true;
+          });
+        });
+        break;
+      case 2:
+        this._typeCommand('\n> git revert', () => {
+          this._appendTerminal('\nReverted.');
+          this.waitingForInput = true;
+        });
+        break;
+      case 3:
+        this._nextStep();
         break;
     }
   }

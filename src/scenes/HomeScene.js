@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { InputManager } from '../systems/InputManager.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
+import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import dialogueData from '../data/dialogue.json';
 
@@ -18,6 +19,7 @@ export class HomeScene extends Phaser.Scene {
     this.inputMgr = new InputManager(this);
     this.transition = new TransitionManager(this);
     this.dialogue = new DialogueSystem(this);
+    this.save = new SaveSystem();
     this.transition.fadeIn(500);
 
     const { width, height } = this.cameras.main;
@@ -57,9 +59,20 @@ export class HomeScene extends Phaser.Scene {
     this.phase = 'explore'; // explore → catFed → ending
     this.frozen = false;
 
-    // Wife greeting
+    // Auto-save at scene start
+    this.save.autoSave('HomeScene', this.gameFlags);
+
+    // Wife greeting — after greeting completes, show hint
     this.dialogue.startSequence(dialogueData.home.greeting, {
-      onComplete: () => { this.frozen = false; },
+      onComplete: () => {
+        if (dialogueData.home.hint) {
+          this.dialogue.startSequence(dialogueData.home.hint, {
+            onComplete: () => { this.frozen = false; },
+          });
+        } else {
+          this.frozen = false;
+        }
+      },
     });
     this.frozen = true;
 

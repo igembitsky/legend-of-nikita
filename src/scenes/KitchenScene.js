@@ -91,6 +91,13 @@ export class KitchenScene extends Phaser.Scene {
 
     this.save.autoSave('KitchenScene', this.gameFlags);
 
+    if (dialogueData.kitchen.intro) {
+      this.dialogue.startSequence(dialogueData.kitchen.intro, {
+        onComplete: () => { this.frozen = false; },
+      });
+      this.frozen = true;
+    }
+
     // Pause overlay
     this.pauseOverlay = new PauseOverlay(this, () => ({
       scene: this.scene.key,
@@ -190,9 +197,15 @@ export class KitchenScene extends Phaser.Scene {
     this.player.setVelocity(0);
 
     if (!this.gameFlags.banana || !this.gameFlags.coffee) {
-      // Pick random gate message
-      const gateMessages = dialogueData.kitchen.gate;
-      const msg = gateMessages[Math.floor(Math.random() * gateMessages.length)];
+      let msg;
+      if (this.gameFlags.banana && !this.gameFlags.coffee) {
+        msg = { speaker: "Nikita", text: "I'm too sleepy." };
+      } else if (!this.gameFlags.banana && this.gameFlags.coffee) {
+        msg = { speaker: "Nikita", text: "I'm too hungry." };
+      } else {
+        const gateMessages = dialogueData.kitchen.gate;
+        msg = gateMessages[Math.floor(Math.random() * gateMessages.length)];
+      }
       this.dialogue.startSequence([msg], {
         onComplete: () => { this.frozen = false; },
       });

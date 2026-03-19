@@ -61,15 +61,15 @@ export class BedroomScene extends Phaser.Scene {
     });
 
     // Cat — patrols back and forth
-    this.cat = this.physics.add.sprite(500, 400, 'cat');
-    this.catZone = new Phaser.Geom.Circle(500, 400, 32);
+    this.cat = this.physics.add.sprite(450, 400, 'cat');
+    this.catZone = new Phaser.Geom.Circle(450, 400, 32);
     this.catDirection = 1;
-    this.catMinX = 460;
-    this.catMaxX = 540;
+    this.catMinX = 350;
+    this.catMaxX = 550;
     this.catSpeed = 20;
 
     // Cat eyes glow
-    this.catEyes = this.add.circle(500, 398, 3, 0x44ff44).setAlpha(0.8);
+    this.catEyes = this.add.circle(450, 398, 3, 0x44ff44).setAlpha(0.8);
     this.tweens.add({
       targets: this.catEyes,
       alpha: { from: 0.8, to: 0 },
@@ -105,7 +105,7 @@ export class BedroomScene extends Phaser.Scene {
 
     // Wake zone visuals (pulsing circles)
     this.wifeGlow = this.add.circle(220, 170, 48, 0xff4444, 0.05);
-    this.catGlow = this.add.circle(500, 400, 32, 0xff4444, 0.05);
+    this.catGlow = this.add.circle(450, 400, 32, 0xff4444, 0.05);
     this.tweens.add({ targets: [this.wifeGlow, this.catGlow], alpha: { from: 0.02, to: 0.08 }, yoyo: true, repeat: -1, duration: 1000 });
 
     // HUD
@@ -206,7 +206,9 @@ export class BedroomScene extends Phaser.Scene {
     this.frozen = true;
     this.player.setVelocity(0);
     this.transition.flash(300, 255, 100, 100);
-    this.dialogue.startSequence(dialogueData.bedroom.fail, {
+    const msgs = dialogueData.bedroom.failMessages || dialogueData.bedroom.fail;
+    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+    this.dialogue.startSequence([msg], {
       onComplete: () => {
         // Reset player position
         this.player.setPosition(300, 350);

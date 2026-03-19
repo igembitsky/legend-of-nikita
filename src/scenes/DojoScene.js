@@ -174,11 +174,26 @@ export class DojoScene extends Phaser.Scene {
       ease: 'Back',
       delay: 1200,
       onComplete: () => {
-        this.round++;
-        if (this.round <= 3) {
-          this.time.delayedCall(500, () => this._startRound());
+        const postKey = `postRound${this.round}`;
+        const postLines = dialogueData.dojo[postKey];
+        if (postLines) {
+          this.dialogue.startSequence(postLines, {
+            onComplete: () => {
+              this.round++;
+              if (this.round <= 3) {
+                this.time.delayedCall(500, () => this._startRound());
+              } else {
+                this.time.delayedCall(500, () => this._showOutcome());
+              }
+            },
+          });
         } else {
-          this.time.delayedCall(500, () => this._showOutcome());
+          this.round++;
+          if (this.round <= 3) {
+            this.time.delayedCall(500, () => this._startRound());
+          } else {
+            this.time.delayedCall(500, () => this._showOutcome());
+          }
         }
       },
     });

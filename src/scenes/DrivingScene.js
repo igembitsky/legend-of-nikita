@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
+import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { InputManager } from '../systems/InputManager.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
+import dialogueData from '../data/dialogue.json';
 
 export class DrivingScene extends Phaser.Scene {
   constructor() {
@@ -18,6 +20,7 @@ export class DrivingScene extends Phaser.Scene {
   create() {
     this.inputMgr = new InputManager(this);
     this.transition = new TransitionManager(this);
+    this.dialogue = new DialogueSystem(this);
     this.save = new SaveSystem();
     this.transition.fadeIn(500);
 
@@ -81,6 +84,7 @@ export class DrivingScene extends Phaser.Scene {
 
     this.crashed = false;
     this.completed = false;
+    this.halfwayShown = false;
 
     // Pause overlay
     this.pauseOverlay = new PauseOverlay(this, () => ({
@@ -88,6 +92,20 @@ export class DrivingScene extends Phaser.Scene {
       flags: this.gameFlags,
       position: this.player ? { x: this.player.x, y: this.player.y } : undefined,
     }));
+
+    // Intro dialogue
+    const introKey = this.destination === 'dojo' ? 'morningIntro' : 'eveningIntro';
+    if (dialogueData.driving?.[introKey]) {
+      this.dialogue.startSequence(dialogueData.driving[introKey]);
+    }
+
+    // Input for dialogue advance
+    this.input.keyboard.on('keydown-SPACE', () => {
+      if (this.dialogue.isActive()) this.dialogue.advance();
+    });
+    this.input.keyboard.on('keydown-ENTER', () => {
+      if (this.dialogue.isActive()) this.dialogue.advance();
+    });
   }
 
   update(time, delta) {
@@ -159,6 +177,14 @@ export class DrivingScene extends Phaser.Scene {
     const pct = Math.min(100, Math.round((this.distanceTraveled / this.targetDistance) * 100));
     this.distText.setText(pct + '%');
 
+    // Halfway milestone
+    if (!this.halfwayShown && this.distanceTraveled >= this.targetDistance * 0.5) {
+      this.halfwayShown = true;
+      if (dialogueData.driving?.halfway) {
+        this.dialogue.startSequence(dialogueData.driving.halfway);
+      }
+    }
+
     if (this.distanceTraveled >= this.targetDistance) {
       this._complete();
     }
@@ -201,8 +227,12 @@ export class DrivingScene extends Phaser.Scene {
     this.crashed = true;
     this.transition.flash(300, 255, 100, 0);
 
+    // Random crash message
+    const msgs = dialogueData.driving?.crashMessages || [{ text: 'CRASH!' }];
+    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+
     // Explosion effect
-    this.add.text(this.player.x, this.player.y - 40, 'CRASH!', {
+    this.add.text(this.player.x, this.player.y - 40, msg.text, {
       fontSize: '28px', color: '#ff4444', fontFamily: 'monospace', fontStyle: 'bold',
     }).setOrigin(0.5);
 

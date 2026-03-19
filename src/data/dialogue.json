@@ -18,9 +18,18 @@
     ],
     "fail": [
       { "speaker": "", "text": "You woke them up!\nMission failed." }
+    ],
+    "failMessages": [
+      { "speaker": "", "text": "You woke them up! Mission failed." },
+      { "speaker": "", "text": "The cat saw everything. You've been judged." },
+      { "speaker": "", "text": "She opened one eye. That's worse than both." },
+      { "speaker": "", "text": "Stealth: 0. Self-respect: also 0." }
     ]
   },
   "kitchen": {
+    "intro": [
+      { "speaker": "", "text": "The kitchen. Step one: become operational.", "style": { "color": "#aaaacc" } }
+    ],
     "banana": [
       { "speaker": "", "text": "BANANA ACQUIRED", "style": { "color": "#ffcc00", "size": "large" } },
       { "speaker": "", "text": "Hunger restored.", "style": { "color": "#aaaaaa" } }
@@ -75,6 +84,18 @@
         { "name": "Vibes-Based Control", "description": "No technique. Only vibes. Somehow it works." }
       ]
     },
+    "postRound1": [
+      { "speaker": "Igor", "text": "What was that?!" },
+      { "speaker": "Nikita", "text": "Art." }
+    ],
+    "postRound2": [
+      { "speaker": "Igor", "text": "That's not even a real move." },
+      { "speaker": "Nikita", "text": "It worked." }
+    ],
+    "postRound3": [
+      { "speaker": "Igor", "text": "I'm calling the police." },
+      { "speaker": "Nikita", "text": "They can't help you." }
+    ],
     "outcome": [
       { "speaker": "Igor", "text": "…yeah, that's fair." },
       { "speaker": "", "text": "*tap*", "style": { "color": "#ffcc00" } },
@@ -82,6 +103,9 @@
     ]
   },
   "office": {
+    "intro": [
+      { "speaker": "", "text": "Time to make AI that makes AI.", "style": { "color": "#00ffcc" } }
+    ],
     "slack": [
       { "speaker": "Customer", "text": "We need AI to replace all human managers." },
       { "speaker": "Nikita", "text": "Sure." }
@@ -103,11 +127,38 @@
     ],
     "success": [
       { "speaker": "Customer", "text": "Mwahahaha. Perfect." }
+    ],
+    "closing": [
+      { "speaker": "Nikita", "text": "All in a day's work." }
+    ]
+  },
+  "driving": {
+    "morningIntro": [
+      { "speaker": "", "text": "Dutch roads. The final boss.", "style": { "color": "#aaaacc" } }
+    ],
+    "eveningIntro": [
+      { "speaker": "", "text": "Almost home. Just survive the cyclists... again.", "style": { "color": "#ccaa88" } }
+    ],
+    "crashMessages": [
+      { "speaker": "", "text": "The cyclist wins. They always win." },
+      { "speaker": "", "text": "Insurance is going to love this." },
+      { "speaker": "", "text": "Elon did not prepare me for this." },
+      { "speaker": "", "text": "That cyclist had no fear." }
+    ],
+    "halfway": [
+      { "speaker": "", "text": "Halfway. Still alive.", "style": { "color": "#88ff88" } }
     ]
   },
   "home": {
     "greeting": [
-      { "speaker": "Wife", "text": "Hey." }
+      { "speaker": "Wife", "text": "Hey." },
+      { "speaker": "Wife", "text": "How was your day?" },
+      { "speaker": "Nikita", "text": "Built an AI. It became sentient. Fixed it." },
+      { "speaker": "Wife", "text": "So... normal Tuesday?" },
+      { "speaker": "Nikita", "text": "Normal Tuesday." }
+    ],
+    "hint": [
+      { "speaker": "", "text": "The cat looks hungry.", "style": { "color": "#888888" } }
     ],
     "catFed": [
       { "speaker": "", "text": "Cat fed. Happiness restored.", "style": { "color": "#ff88aa" } }
