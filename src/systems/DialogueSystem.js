@@ -60,10 +60,10 @@ export class DialogueSystem {
   advance() {
     if (!this.active) return;
 
-    // If currently typing, complete the text instantly then continue advancing
+    // If currently typing, just complete the text — don't advance yet
     if (this.isTyping) {
       this._completeTyping();
-      // Fall through to advance to next line
+      return;
     }
 
     this.lineIndex++;

@@ -84,7 +84,7 @@ export class HomeScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(width * 0.8, height * 0.8, 'nikita-dressed');
     this.player.setCollideWorldBounds(true);
     this.player.setDepth(50);
-    this.playerSpeed = 130;
+    this.playerSpeed = 150;
 
     // Shadow under player
     this.playerShadow = this.add.ellipse(this.player.x, this.player.y + 22, 24, 8, 0x000000, 0.2).setDepth(1);

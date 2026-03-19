@@ -57,14 +57,16 @@ describe('DialogueSystem', () => {
       { speaker: 'Igor', text: 'Line 2' },
     ];
     dialogue.startSequence(lines);
-    dialogue.advance();
+    dialogue.advance(); // completes typing
+    dialogue.advance(); // advances to next line
     expect(dialogue.currentLine()).toBe(1);
   });
 
   it('completes sequence after last line', () => {
     const lines = [{ speaker: 'Nikita', text: 'Only line' }];
     dialogue.startSequence(lines);
-    dialogue.advance();
+    dialogue.advance(); // completes typing
+    dialogue.advance(); // advances past last line
     expect(dialogue.isActive()).toBe(false);
   });
 
@@ -86,7 +88,8 @@ describe('DialogueSystem', () => {
     const onComplete = vi.fn();
     const lines = [{ speaker: 'Nikita', text: 'Done' }];
     dialogue.startSequence(lines, { onComplete });
-    dialogue.advance();
+    dialogue.advance(); // completes typing
+    dialogue.advance(); // advances past last line → triggers onComplete
     expect(onComplete).toHaveBeenCalled();
   });
 });

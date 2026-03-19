@@ -258,7 +258,7 @@ export class BedroomScene extends Phaser.Scene {
       roomX + wallT + 14, roomY + wallT + 6,
       roomW - wallT * 2 - 28, roomH - wallT * 2 - 12
     ));
-    this.playerSpeed = 100;
+    this.playerSpeed = 115;
     this.playerShadow = this.add.ellipse(this.player.x, this.player.y + 20, 20, 6, 0x000000, 0.2).setDepth(1);
     this.inBed = true;
     this.lastDir = 'down'; // Track facing direction
