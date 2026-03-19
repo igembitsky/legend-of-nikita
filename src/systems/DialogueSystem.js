@@ -135,10 +135,10 @@ export class DialogueSystem {
 
   _createUI() {
     const cam = this.scene.cameras.main;
-    const boxHeight = 160;
-    const boxWidth = cam.width - 60;
+    const boxHeight = 130;
+    const boxWidth = cam.width - 100;
     const boxX = cam.width / 2;
-    const boxY = cam.height - boxHeight / 2 - 20;
+    const boxY = cam.height - boxHeight / 2 - 12;
 
     // Main dialogue box — Nine Slice if available, rectangle fallback
     if (this.scene.textures.exists('ui-dialogue-frame') && this.scene.add.nineslice) {
