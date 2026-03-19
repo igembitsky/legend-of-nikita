@@ -201,18 +201,19 @@ export class DialogueSystem {
       wordWrap: { width: boxWidth - 170 },
     }).setScrollFactor(0).setDepth(1001);
 
-    // Advance indicator (blinking triangle)
+    // Advance indicator — clearly shows how to continue
     this.advanceIndicator = this.scene.add.text(
-      cam.width - 60, boxY + boxHeight / 2 - 24, '▼', {
-        fontSize: '14px', color: '#ccaa44', fontFamily: 'monospace',
+      cam.width - 80, boxY + boxHeight / 2 - 20, 'ENTER ▼', {
+        fontSize: '11px', color: '#ccaa44', fontFamily: 'monospace',
       }
-    ).setScrollFactor(0).setDepth(1002);
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(1002);
 
     if (this.scene.tweens) {
       this.scene.tweens.add({
         targets: this.advanceIndicator,
         alpha: { from: 1, to: 0.3 },
-        yoyo: true, repeat: -1, duration: 500,
+        y: { from: boxY + boxHeight / 2 - 20, to: boxY + boxHeight / 2 - 16 },
+        yoyo: true, repeat: -1, duration: 600,
       });
     }
   }

@@ -138,6 +138,7 @@ export class BootScene extends Phaser.Scene {
 
   _generateSprites() {
     // Characters
+    this._drawCharacter('nikita-underwear', (g) => this._drawNikitaUnderwear(g), 32, 48);
     this._drawCharacter('nikita-pajamas', (g) => this._drawNikitaPajamas(g), 32, 48);
     this._drawCharacter('nikita-dressed', (g) => this._drawNikitaDressed(g), 32, 48);
     this._drawCharacter('nikita-gi', (g) => this._drawNikitaGi(g), 32, 48);
@@ -182,6 +183,53 @@ export class BootScene extends Phaser.Scene {
   }
 
   // ─── CHARACTERS ──────────────────────────────────────────────────────────
+
+  _drawNikitaUnderwear(g) {
+    // Hair
+    g.fillStyle(0x3a2010);
+    g.fillRect(8, 0, 16, 8);
+    g.fillRect(6, 4, 20, 6);
+    // Face
+    g.fillStyle(0xf0c090);
+    g.fillRect(8, 8, 16, 12);
+    // Eyes
+    g.fillStyle(0x333355);
+    g.fillRect(11, 12, 3, 3);
+    g.fillRect(18, 12, 3, 3);
+    g.fillStyle(0xffffff);
+    g.fillRect(12, 12, 1, 1);
+    g.fillRect(19, 12, 1, 1);
+    // Sleepy eyes (half closed)
+    g.fillStyle(0xf0c090);
+    g.fillRect(11, 12, 3, 1);
+    g.fillRect(18, 12, 3, 1);
+    // Mouth (yawn)
+    g.fillStyle(0xcc7755);
+    g.fillRect(14, 17, 4, 3);
+    // Neck
+    g.fillStyle(0xf0c090);
+    g.fillRect(13, 20, 6, 3);
+    // Bare chest/torso (skin)
+    g.fillStyle(0xf0c090);
+    g.fillRect(6, 23, 20, 14);
+    // Chest shadow
+    g.fillStyle(0xe0b080, 0.4);
+    g.fillRect(6, 30, 20, 2);
+    // Arms (skin)
+    g.fillStyle(0xf0c090);
+    g.fillRect(2, 24, 4, 10);
+    g.fillRect(26, 24, 4, 10);
+    // Underwear (boxer shorts - dark)
+    g.fillStyle(0x333355);
+    g.fillRect(6, 37, 20, 8);
+    // Waistband
+    g.fillStyle(0x444466);
+    g.fillRect(6, 36, 20, 2);
+    // Legs (skin)
+    g.fillStyle(0xf0c090);
+    g.fillRect(8, 45, 6, 3);
+    g.fillRect(18, 45, 6, 3);
+  }
 
   _drawNikitaPajamas(g) {
     // Hair (dark brown)
