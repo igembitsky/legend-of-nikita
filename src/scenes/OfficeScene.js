@@ -161,10 +161,17 @@ export class OfficeScene extends Phaser.Scene {
       .setDepth(500).setVisible(false);
     this.terminalBorder = this.add.rectangle(width / 2, height / 2, 604, 354, 0x00ff88, 0.3)
       .setDepth(499).setVisible(false);
-    this.terminalText = this.add.text(width / 2 - 270, height / 2 - 150, '', {
+    this.terminalTextTopY = height / 2 - 150;
+    this.terminalVisibleH = 300;
+    this.terminalText = this.add.text(width / 2 - 270, this.terminalTextTopY, '', {
       fontSize: '16px', color: '#00ff88', fontFamily: 'monospace', lineSpacing: 8,
       wordWrap: { width: 540 },
     }).setDepth(501).setVisible(false);
+
+    // Mask to clip terminal text within the box
+    const termMask = this.make.graphics({ add: false });
+    termMask.fillRect(width / 2 - 280, height / 2 - 155, 560, 310);
+    this.terminalText.setMask(termMask.createGeometryMask());
 
     // Red overlay for panic (hidden initially)
     this.redOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0xff0000, 0)
@@ -393,25 +400,61 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   _showSlack() {
-    const { width } = this.cameras.main;
-    const slackBg = this.add.rectangle(width - 10, 10, 300, 60, 0x4a154b, 0.95)
-      .setOrigin(1, 0).setDepth(600);
-    const slackText = this.add.text(width - 160, 25, dialogueData.office.slack[0].text, {
-      fontSize: '13px', color: '#ffffff', fontFamily: 'monospace',
-      wordWrap: { width: 270 },
-    }).setOrigin(0.5, 0).setDepth(601);
+    const { width, height } = this.cameras.main;
+    const cx = width / 2;
+    const cy = height / 2;
 
-    // Slide in
-    slackBg.x = width + 310;
-    slackText.x = width + 150;
-    this.tweens.add({ targets: [slackBg], x: width - 10, duration: 400, ease: 'Back' });
+    // Email window background
+    const emailBg = this.add.rectangle(cx, cy, 460, 220, 0x1a1a2e, 0.97)
+      .setDepth(600);
+    const emailBorder = this.add.rectangle(cx, cy, 464, 224, 0x4a4a6a, 0.8)
+      .setStrokeStyle(1, 0x6a6a8a).setFillStyle(0, 0).setDepth(599);
+
+    // Title bar
+    const titleBar = this.add.rectangle(cx, cy - 95, 460, 30, 0x2a2a4a)
+      .setDepth(601);
+    const titleText = this.add.text(cx, cy - 95, 'Inbox - 1 new message', {
+      fontSize: '11px', color: '#8888aa', fontFamily: 'monospace',
+    }).setOrigin(0.5).setDepth(602);
+
+    // From / Subject headers
+    const fromText = this.add.text(cx - 210, cy - 68, 'From: Customer', {
+      fontSize: '13px', color: '#ccaa44', fontFamily: 'monospace',
+    }).setDepth(602);
+    const subjectText = this.add.text(cx - 210, cy - 48, 'Subject: Urgent Request', {
+      fontSize: '13px', color: '#aaaacc', fontFamily: 'monospace',
+    }).setDepth(602);
+
+    // Separator line
+    const sep = this.add.rectangle(cx, cy - 32, 420, 1, 0x4a4a6a)
+      .setDepth(602);
+
+    // Message body
+    const bodyText = this.add.text(cx, cy + 15, dialogueData.office.slack[0].text, {
+      fontSize: '16px', color: '#ffffff', fontFamily: 'monospace',
+      wordWrap: { width: 400 }, align: 'center',
+    }).setOrigin(0.5).setDepth(602);
+
+    const allParts = [emailBg, emailBorder, titleBar, titleText, fromText, subjectText, sep, bodyText];
+
+    // Fade in
+    allParts.forEach(p => p.setAlpha(0));
     this.tweens.add({
-      targets: [slackText], x: width - 160, duration: 400, ease: 'Back',
+      targets: allParts,
+      alpha: 1,
+      duration: 400,
+      ease: 'Quad.easeOut',
       onComplete: () => {
-        this.time.delayedCall(2000, () => {
-          slackBg.destroy();
-          slackText.destroy();
-          this._nextStep();
+        this.time.delayedCall(2500, () => {
+          this.tweens.add({
+            targets: allParts,
+            alpha: 0,
+            duration: 300,
+            onComplete: () => {
+              allParts.forEach(p => p.destroy());
+              this._nextStep();
+            },
+          });
         });
       },
     });
@@ -432,6 +475,7 @@ export class OfficeScene extends Phaser.Scene {
       callback: () => {
         i++;
         this.terminalText.setText(existing + cmd.substring(0, i));
+        this._scrollTerminal();
         if (i >= cmd.length && onDone) {
           this.time.delayedCall(300, onDone);
         }
@@ -441,6 +485,14 @@ export class OfficeScene extends Phaser.Scene {
 
   _appendTerminal(text) {
     this.terminalText.setText(this.terminalText.text + text);
+    this._scrollTerminal();
+  }
+
+  _scrollTerminal() {
+    const textH = this.terminalText.height;
+    if (textH > this.terminalVisibleH) {
+      this.terminalText.y = this.terminalTextTopY - (textH - this.terminalVisibleH);
+    }
   }
 
   _showProgress(onDone) {
@@ -453,6 +505,7 @@ export class OfficeScene extends Phaser.Scene {
         pct += 5;
         const bar = '█'.repeat(Math.floor(pct / 5)) + '░'.repeat(20 - Math.floor(pct / 5));
         this.terminalText.setText(existing + `\n[${bar}] ${pct}%`);
+        this._scrollTerminal();
         if (pct >= 100 && onDone) {
           this.time.delayedCall(200, onDone);
         }

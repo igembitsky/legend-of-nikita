@@ -102,17 +102,18 @@ export class DialogueSystem {
     // Portrait mapping
     const portraitMap = {
       'Nikita': 'portrait-nikita', 'Igor': 'portrait-igor', 'Wife': 'portrait-sveta',
-      'Cat': 'cat', 'Sensei': 'portrait-nashebo', 'Customer': 'office-npc',
-      'AI': 'office-robot', 'Terminal': 'office-robot',
+      'Sveta': 'portrait-sveta', 'Cat': 'cat', 'Sensei': 'portrait-nashebo',
+      'Nashebo': 'portrait-nashebo', 'Customer': 'office-npc',
+      'AI': 'office-robot', 'Terminal': 'office-robot', 'GreetBot': 'office-robot',
     };
 
-    // Update portrait
+    // Update portrait — always show one (fallback to Nikita for narrator lines)
     if (this.portrait) { this.portrait.destroy(); this.portrait = null; }
-    const portraitKey = portraitMap[line.speaker];
-    if (portraitKey && this.scene.textures?.exists(portraitKey)) {
+    const portraitKey = portraitMap[line.speaker] || 'portrait-nikita';
+    if (this.scene.textures?.exists(portraitKey)) {
       const cam = this.scene.cameras.main;
-      this.portrait = this.scene.add.sprite(75, cam.height - 100, portraitKey)
-        .setDisplaySize(56, 56)
+      this.portrait = this.scene.add.sprite(87, cam.height - 100, portraitKey)
+        .setDisplaySize(80, 80)
         .setScrollFactor(0)
         .setDepth(1002);
     }
@@ -176,29 +177,29 @@ export class DialogueSystem {
     }).setOrigin(0.5).setScrollFactor(0).setDepth(1002);
 
     // Portrait area (left side of dialogue box)
-    const portraitX = 75;
+    const portraitX = 87;
     const portraitY = boxY;
     if (this.scene.textures.exists('ui-portrait-frame') && this.scene.add.nineslice) {
       this.portraitFrame = this.scene.add.nineslice(
         portraitX, portraitY, 'ui-portrait-frame',
-        undefined, 72, 72, 6, 6, 6, 6
+        undefined, 96, 96, 6, 6, 6, 6
       ).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
     } else {
       this.portraitFrame = this.scene.add.rectangle(
-        portraitX, portraitY, 72, 72, 0x0a0a20, 0.8
+        portraitX, portraitY, 96, 96, 0x0a0a20, 0.8
       ).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
     }
     this.portrait = null;
 
     // Body text (shifted right for portrait)
-    const textX = 130;
+    const textX = 150;
     const textY = boxY - boxHeight / 2 + 24;
     this.bodyText = this.scene.add.text(textX, textY, '', {
       fontSize: '16px',
       color: '#ffffff',
       fontFamily: 'monospace',
       lineSpacing: 8,
-      wordWrap: { width: boxWidth - 170 },
+      wordWrap: { width: boxWidth - 190 },
     }).setScrollFactor(0).setDepth(1001);
 
     // Advance indicator — clearly shows how to continue
@@ -258,7 +259,7 @@ export class DialogueSystem {
   _showChoices(choices) {
     const cam = this.scene.cameras.main;
     const startY = cam.height - 160 - 20 + 80;
-    const startX = 130;
+    const startX = 150;
 
     choices.forEach((choice, i) => {
       const name = typeof choice === 'string' ? choice : choice.name;
