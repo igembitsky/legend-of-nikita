@@ -6,6 +6,8 @@ import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import { AtmosphereManager } from '../systems/AtmosphereManager.js';
+import { MovementController } from '../systems/MovementController.js';
+import { CharacterAnimator } from '../systems/CharacterAnimator.js';
 import dialogueData from '../data/dialogue.json';
 
 export class BedroomScene extends Phaser.Scene {
@@ -252,16 +254,21 @@ export class BedroomScene extends Phaser.Scene {
     // =============================================
     // === PLAYER (starts in bed, underwear) ===
     // =============================================
-    this.player = this.physics.add.sprite(bedX + 36, bedY - 6, 'nikita-underwear').setDepth(50);
+    this.player = this.physics.add.sprite(bedX + 36, bedY - 6, 'nikita-underwear-d0').setDepth(50);
     this.player.setCollideWorldBounds(true);
     this.player.body.setBoundsRectangle(new Phaser.Geom.Rectangle(
       roomX + wallT + 14, roomY + wallT + 6,
       roomW - wallT * 2 - 28, roomH - wallT * 2 - 12
     ));
-    this.playerSpeed = 115;
     this.playerShadow = this.add.ellipse(this.player.x, this.player.y + 20, 20, 6, 0x000000, 0.2).setDepth(1);
+    this.animator = new CharacterAnimator(this);
+    this.movement = new MovementController(this, this.player, {
+      speed: 127,
+      shadow: { sprite: this.playerShadow, offsetY: 20 },
+      animator: this.animator,
+      animKey: 'nikita-underwear',
+    });
     this.inBed = true;
-    this.lastDir = 'down'; // Track facing direction
 
     // Show as lying in bed
     this.player.setScale(1, 0.5).setAlpha(0.6);
@@ -359,26 +366,16 @@ export class BedroomScene extends Phaser.Scene {
   update(time, delta) {
     if (this.pauseOverlay?.isPaused()) return;
 
-    // Sync shadows always
-    if (this.playerShadow) this.playerShadow.setPosition(this.player.x, this.player.y + 20);
+    // Sync cat shadow always
     if (this.catShadow) this.catShadow.setPosition(this.cat.x, this.cat.y + 8);
 
     if (this.frozen || this.dialogue.isActive()) {
-      this.player.setVelocity(0);
+      this.movement.stop();
       return;
     }
 
-    // === PLAYER MOVEMENT + FACING DIRECTION ===
-    let vx = 0, vy = 0;
-    if (this.inputMgr.isDown('left')) { vx = -this.playerSpeed; this.lastDir = 'left'; }
-    if (this.inputMgr.isDown('right')) { vx = this.playerSpeed; this.lastDir = 'right'; }
-    if (this.inputMgr.isDown('up')) { vy = -this.playerSpeed; this.lastDir = 'up'; }
-    if (this.inputMgr.isDown('down')) { vy = this.playerSpeed; this.lastDir = 'down'; }
-    this.player.setVelocity(vx, vy);
-
-    // Flip sprite based on horizontal direction
-    if (vx < 0) this.player.setFlipX(true);
-    else if (vx > 0) this.player.setFlipX(false);
+    // === PLAYER MOVEMENT ===
+    this.movement.update(this.inputMgr, delta);
 
     // === CAT PATROL (2D wander) ===
     this.cat.x += this.catDirection * this.catSpeed * (delta / 1000);
@@ -442,7 +439,7 @@ export class BedroomScene extends Phaser.Scene {
   _catMeow() {
     this.catMeowed = true;
     this.frozen = true;
-    this.player.setVelocity(0);
+    this.movement.stop();
     this.audio.playMeow();
 
     // Cat jumps away
@@ -468,7 +465,7 @@ export class BedroomScene extends Phaser.Scene {
 
   _failStealth() {
     this.frozen = true;
-    this.player.setVelocity(0);
+    this.movement.stop();
     this.audio.playAlarm();
     this.transition.flash(300, 255, 100, 100);
     const msgs = dialogueData.bedroom.failMessages || dialogueData.bedroom.fail;
@@ -486,10 +483,11 @@ export class BedroomScene extends Phaser.Scene {
 
   _getDressed() {
     this.frozen = true;
-    this.player.setVelocity(0);
+    this.movement.stop();
     this.dressed = true;
     this.gameFlags.dressed = true;
-    this.player.setTexture('nikita-dressed');
+    this.player.setTexture('nikita-dressed-d0');
+    this.movement.animKey = 'nikita-dressed';
     this.audio.playFanfare();
     this.closetIndicator.group.setVisible(false);
     this._updateObjective('Head to the stairs');
@@ -504,7 +502,7 @@ export class BedroomScene extends Phaser.Scene {
 
   _tryExit() {
     this.frozen = true;
-    this.player.setVelocity(0);
+    this.movement.stop();
 
     if (!this.dressed) {
       this.dialogue.startSequence(dialogueData.bedroom.gate, {

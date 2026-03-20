@@ -87,6 +87,34 @@ export class ProceduralAudio {
     this._playTone(150, now, 0.1, 'sawtooth', 0.2);
   }
 
+  playCrawlHit() {
+    // Dramatic orchestral hit — layered brass-like chord with long decay
+    const now = this.audioContext.currentTime;
+    const hitNotes = [
+      { freq: 65.41, type: 'sawtooth', vol: 0.35 },   // C2 - deep bass
+      { freq: 130.81, type: 'sawtooth', vol: 0.3 },    // C3 - low brass
+      { freq: 196.00, type: 'square', vol: 0.2 },      // G3 - fifth
+      { freq: 261.63, type: 'sawtooth', vol: 0.25 },   // C4 - mid brass
+      { freq: 329.63, type: 'square', vol: 0.15 },     // E4 - major third
+      { freq: 523.25, type: 'sawtooth', vol: 0.12 },   // C5 - high octave
+    ];
+    for (const note of hitNotes) {
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+      osc.type = note.type;
+      osc.frequency.setValueAtTime(note.freq, now);
+      gain.gain.setValueAtTime(note.vol, now);
+      gain.gain.setValueAtTime(note.vol, now + 0.3);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(now);
+      osc.stop(now + 2.1);
+    }
+    // Add noise burst for attack transient
+    this._playNoise(0.08, 0.4);
+  }
+
   // === Music Methods ===
   // Simple looping note sequences using setInterval
 

@@ -137,7 +137,13 @@ export class BootScene extends Phaser.Scene {
   }
 
   _generateSprites() {
-    // Characters
+    // Characters — generate directional walk sheets for playable characters
+    this._generateWalkSheet('nikita-underwear', this._nikitaOutfit('underwear'));
+    this._generateWalkSheet('nikita-pajamas', this._nikitaOutfit('pajamas'));
+    this._generateWalkSheet('nikita-dressed', this._nikitaOutfit('dressed'));
+    this._generateWalkSheet('nikita-gi', this._nikitaOutfit('gi'));
+
+    // Also keep original static textures for portraits/dialogue
     this._drawCharacter('nikita-underwear', (g) => this._drawNikitaUnderwear(g), 32, 48);
     this._drawCharacter('nikita-pajamas', (g) => this._drawNikitaPajamas(g), 32, 48);
     this._drawCharacter('nikita-dressed', (g) => this._drawNikitaDressed(g), 32, 48);
@@ -182,7 +188,429 @@ export class BootScene extends Phaser.Scene {
     this._drawCharacter('bed', (g) => this._drawBed(g), 128, 80);
   }
 
-  // ─── CHARACTERS ──────────────────────────────────────────────────────────
+  // ─── DIRECTIONAL WALK SHEET SYSTEM ────────────────────────────────────────
+
+  _nikitaOutfit(variant) {
+    const base = {
+      hair: 0x3a2010, skin: 0xf0c090, earSkin: 0xe0b080,
+      eyeColor: 0x333355, mouthColor: 0xcc7755,
+    };
+    switch (variant) {
+      case 'underwear': return {
+        ...base, sleepyEyes: true, mouthW: 4, mouthH: 3,
+        shirtColor: null, // bare chest
+        sleeveColor: null,
+        pantsColor: 0x333355, waistColor: 0x444466,
+        legStartY: 37, legH: 8, seamColor: null,
+        shoeColor: null, footSkin: true,
+        drawFrontDetails: (g) => {
+          // Chest shadow
+          g.fillStyle(0xe0b080);
+          g.fillRect(6, 30, 20, 2);
+        },
+      };
+      case 'pajamas': return {
+        ...base,
+        shirtColor: 0x6688bb, sleeveColor: 0x6688bb,
+        pantsColor: 0x4466aa, waistColor: 0x5577bb, seamColor: 0x3355aa,
+        legStartY: 37, legH: 11,
+        shoeColor: 0xeeeeff, shoeH: 2,
+        drawFrontDetails: (g) => {
+          // Button line
+          g.fillStyle(0x8899cc);
+          g.fillRect(15, 24, 2, 12);
+          // Collar
+          g.fillStyle(0x8899cc);
+          g.fillRect(10, 23, 5, 3);
+          g.fillRect(17, 23, 5, 3);
+        },
+        drawCuffs: (g) => {
+          g.fillStyle(0xf0c090);
+          g.fillRect(1, 33, 4, 4);
+          g.fillRect(27, 33, 4, 4);
+        },
+      };
+      case 'dressed': return {
+        ...base,
+        shirtColor: 0x2266cc, sleeveColor: 0x2266cc,
+        pantsColor: 0x333344, waistColor: 0x222233, seamColor: 0x1a1a2a,
+        legStartY: 37, legH: 11,
+        shoeColor: 0x1a1a1a, shoeH: 4, shoeHighlight: 0x333333,
+        drawFrontDetails: (g) => {
+          // Button line + buttons
+          g.fillStyle(0xffffff);
+          g.fillRect(15, 24, 2, 12);
+          g.fillStyle(0xdddddd);
+          g.fillRect(15, 26, 2, 2);
+          g.fillRect(15, 30, 2, 2);
+          g.fillRect(15, 34, 2, 2);
+          // Collar
+          g.fillStyle(0x1a55bb);
+          g.fillRect(10, 23, 5, 4);
+          g.fillRect(17, 23, 5, 4);
+        },
+        drawCuffs: (g) => {
+          g.fillStyle(0xffffff);
+          g.fillRect(0, 33, 5, 2);
+          g.fillRect(27, 33, 5, 2);
+          // Hands
+          g.fillStyle(0xf0c090);
+          g.fillRect(1, 34, 4, 3);
+          g.fillRect(27, 34, 4, 3);
+        },
+      };
+      case 'gi': return {
+        ...base,
+        shirtColor: 0xeeeeee, sleeveColor: 0xeeeeee,
+        pantsColor: 0xf0f0f0, waistColor: null, seamColor: 0xdddddd,
+        legStartY: 39, legH: 9,
+        shoeColor: null, footSkin: true,
+        drawFrontDetails: (g) => {
+          // Lapels
+          g.fillStyle(0xdddddd);
+          g.fillRect(10, 23, 5, 8);
+          g.fillRect(17, 23, 5, 8);
+          // Center overlap
+          g.fillStyle(0xffffff);
+          g.fillRect(14, 24, 4, 12);
+          // Blue belt
+          g.fillStyle(0x2244aa);
+          g.fillRect(4, 35, 24, 4);
+          g.fillStyle(0x1133aa);
+          g.fillRect(13, 35, 6, 4);
+          g.fillStyle(0x2244aa);
+          g.fillRect(9, 37, 4, 2);
+          g.fillRect(19, 37, 4, 2);
+        },
+        drawEyebrows: true,
+      };
+      default: return base;
+    }
+  }
+
+  /**
+   * Generate individual walk frame textures and register Phaser animations.
+   * Creates: {key}-d0/d1/d2 (front), {key}-u0/u1/u2 (back), {key}-s0/s1/s2 (side)
+   * Left uses side frames with flipX; right uses side frames without flip.
+   */
+  _generateWalkSheet(key, outfit) {
+    const W = 32, H = 48;
+
+    for (const facing of ['down', 'up', 'side']) {
+      for (let frame = 0; frame < 3; frame++) {
+        const texKey = `${key}-${facing[0]}${frame}`;
+        if (this.textures.exists(texKey)) continue;
+
+        const g = this.make.graphics({ add: false });
+        this._drawDirectionalCharacter(g, outfit, facing, frame);
+        g.generateTexture(texKey, W, H);
+        g.destroy();
+      }
+    }
+
+    // Register animations
+    // Walk down (front): stand, left-step, stand, right-step
+    this.anims.create({
+      key: `${key}-walk-down`,
+      frames: [
+        { key: `${key}-d0` }, { key: `${key}-d1` },
+        { key: `${key}-d0` }, { key: `${key}-d2` },
+      ],
+      frameRate: 8, repeat: -1,
+    });
+    this.anims.create({
+      key: `${key}-idle-down`,
+      frames: [{ key: `${key}-d0` }],
+      frameRate: 1, repeat: 0,
+    });
+
+    // Walk up (back)
+    this.anims.create({
+      key: `${key}-walk-up`,
+      frames: [
+        { key: `${key}-u0` }, { key: `${key}-u1` },
+        { key: `${key}-u0` }, { key: `${key}-u2` },
+      ],
+      frameRate: 8, repeat: -1,
+    });
+    this.anims.create({
+      key: `${key}-idle-up`,
+      frames: [{ key: `${key}-u0` }],
+      frameRate: 1, repeat: 0,
+    });
+
+    // Left/right use side-facing frames (left = flipX, right = no flip)
+    this.anims.create({
+      key: `${key}-walk-left`,
+      frames: [
+        { key: `${key}-s0` }, { key: `${key}-s1` },
+        { key: `${key}-s0` }, { key: `${key}-s2` },
+      ],
+      frameRate: 8, repeat: -1,
+    });
+    this.anims.create({
+      key: `${key}-idle-left`,
+      frames: [{ key: `${key}-s0` }],
+      frameRate: 1, repeat: 0,
+    });
+    this.anims.create({
+      key: `${key}-walk-right`,
+      frames: [
+        { key: `${key}-s0` }, { key: `${key}-s1` },
+        { key: `${key}-s0` }, { key: `${key}-s2` },
+      ],
+      frameRate: 8, repeat: -1,
+    });
+    this.anims.create({
+      key: `${key}-idle-right`,
+      frames: [{ key: `${key}-s0` }],
+      frameRate: 1, repeat: 0,
+    });
+  }
+
+  _drawDirectionalCharacter(g, o, facing, walkFrame) {
+    if (facing === 'side') {
+      this._drawSideCharacter(g, o, walkFrame);
+      return;
+    }
+
+    const isBack = facing === 'up';
+
+    // === HAIR ===
+    g.fillStyle(o.hair);
+    if (isBack) {
+      // Back of head — hair covers everything
+      g.fillRect(6, 0, 20, 18);
+      // Ears poke out
+      g.fillStyle(o.earSkin || o.skin);
+      g.fillRect(5, 10, 3, 5);
+      g.fillRect(24, 10, 3, 5);
+    } else {
+      // Front-facing head
+      g.fillRect(8, 0, 16, 8);
+      g.fillRect(6, 4, 20, 6);
+      // Face
+      g.fillStyle(o.skin);
+      g.fillRect(8, 8, 16, 12);
+      // Ears
+      if (o.earSkin) {
+        g.fillStyle(o.earSkin);
+        g.fillRect(6, 10, 3, 6);
+        g.fillRect(23, 10, 3, 6);
+      }
+      // Eyes
+      g.fillStyle(o.eyeColor);
+      g.fillRect(11, 12, 3, 3);
+      g.fillRect(18, 12, 3, 3);
+      // Eye highlights
+      g.fillStyle(0xffffff);
+      g.fillRect(12, 12, 1, 1);
+      g.fillRect(19, 12, 1, 1);
+      // Sleepy eyes (half closed)
+      if (o.sleepyEyes) {
+        g.fillStyle(o.skin);
+        g.fillRect(11, 12, 3, 1);
+        g.fillRect(18, 12, 3, 1);
+      }
+      // Eyebrows
+      if (o.drawEyebrows) {
+        g.fillStyle(o.hair);
+        g.fillRect(10, 10, 5, 2);
+        g.fillRect(17, 10, 5, 2);
+      }
+      // Mouth
+      g.fillStyle(o.mouthColor);
+      g.fillRect(13, 17, o.mouthW || 6, o.mouthH || 2);
+    }
+
+    // === NECK ===
+    g.fillStyle(o.skin);
+    g.fillRect(13, 20, 6, 3);
+
+    // === TORSO ===
+    if (o.shirtColor) {
+      g.fillStyle(o.shirtColor);
+      g.fillRect(4, 23, 24, 14);
+      if (!isBack && o.drawFrontDetails) o.drawFrontDetails(g);
+    } else {
+      // Bare torso
+      g.fillStyle(o.skin);
+      g.fillRect(6, 23, 20, 14);
+      if (!isBack && o.drawFrontDetails) o.drawFrontDetails(g);
+    }
+
+    // === ARMS ===
+    const armColor = o.sleeveColor || o.shirtColor || o.skin;
+    g.fillStyle(armColor);
+    g.fillRect(0, 24, 5, 10);
+    g.fillRect(27, 24, 5, 10);
+    // Arm swing for walk frames
+    if (walkFrame === 1) {
+      g.fillStyle(armColor);
+      g.fillRect(0, 22, 5, 10);
+      g.fillRect(27, 26, 5, 10);
+    } else if (walkFrame === 2) {
+      g.fillStyle(armColor);
+      g.fillRect(0, 26, 5, 10);
+      g.fillRect(27, 22, 5, 10);
+    }
+    if (o.drawCuffs && !isBack) o.drawCuffs(g);
+
+    // === LEGS (offset by walk frame) ===
+    const legY = o.legStartY || 37;
+    const legH = o.legH || 11;
+    const leftOff = walkFrame === 1 ? -2 : walkFrame === 2 ? 2 : 0;
+    const rightOff = walkFrame === 1 ? 2 : walkFrame === 2 ? -2 : 0;
+
+    if (o.waistColor) {
+      g.fillStyle(o.waistColor);
+      g.fillRect(6, legY, 20, 3);
+    }
+
+    g.fillStyle(o.pantsColor);
+    g.fillRect(6, legY + leftOff, 8, legH);
+    g.fillRect(18, legY + rightOff, 8, legH);
+
+    if (o.seamColor) {
+      g.fillStyle(o.seamColor);
+      g.fillRect(14, legY + 3, 4, legH - 3);
+    }
+
+    // === FEET/SHOES ===
+    const shoeY = legY + legH - 2;
+    if (o.shoeColor) {
+      const sh = o.shoeH || 4;
+      g.fillStyle(o.shoeColor);
+      g.fillRect(5, shoeY + leftOff, 10, sh);
+      g.fillRect(17, shoeY + rightOff, 10, sh);
+      if (o.shoeHighlight) {
+        g.fillStyle(o.shoeHighlight);
+        g.fillRect(5, shoeY + leftOff, 10, 1);
+        g.fillRect(17, shoeY + rightOff, 10, 1);
+      }
+    } else if (o.footSkin) {
+      g.fillStyle(o.skin);
+      g.fillRect(6, shoeY + leftOff, 8, 2);
+      g.fillRect(18, shoeY + rightOff, 8, 2);
+    }
+  }
+
+  /**
+   * Draw character from the side (facing right). FlipX gives left-facing.
+   * Narrower body profile, one eye, hair swept to one side.
+   */
+  _drawSideCharacter(g, o, walkFrame) {
+    // Side-facing character is drawn facing RIGHT.
+    // Center the narrower body in the 32px width.
+    const cx = 16; // center of 32px
+
+    // === HAIR (side profile — swept back) ===
+    g.fillStyle(o.hair);
+    g.fillRect(cx - 7, 0, 14, 8);   // top of head
+    g.fillRect(cx - 9, 3, 14, 7);   // hair mass (swept left/back)
+
+    // === FACE (side profile) ===
+    g.fillStyle(o.skin);
+    g.fillRect(cx - 5, 7, 12, 13);  // face (shifted right = facing right)
+
+    // Ear (back side, partially visible)
+    g.fillStyle(o.earSkin || o.skin);
+    g.fillRect(cx - 7, 10, 3, 5);
+
+    // One eye (on the right side of face)
+    g.fillStyle(o.eyeColor);
+    g.fillRect(cx + 2, 12, 3, 3);
+    g.fillStyle(0xffffff);
+    g.fillRect(cx + 3, 12, 1, 1);
+
+    if (o.sleepyEyes) {
+      g.fillStyle(o.skin);
+      g.fillRect(cx + 2, 12, 3, 1);
+    }
+    if (o.drawEyebrows) {
+      g.fillStyle(o.hair);
+      g.fillRect(cx + 1, 10, 5, 2);
+    }
+
+    // Nose (small bump on right edge)
+    g.fillStyle(o.skin);
+    g.fillRect(cx + 6, 13, 2, 3);
+
+    // Mouth
+    g.fillStyle(o.mouthColor);
+    g.fillRect(cx + 2, 17, 3, 2);
+
+    // === NECK ===
+    g.fillStyle(o.skin);
+    g.fillRect(cx - 2, 20, 6, 3);
+
+    // === TORSO (narrower from side) ===
+    const torsoColor = o.shirtColor || o.skin;
+    g.fillStyle(torsoColor);
+    g.fillRect(cx - 8, 23, 18, 14);
+
+    // === ARM (one visible, in front/back depending on walk frame) ===
+    const armColor = o.sleeveColor || o.shirtColor || o.skin;
+    if (walkFrame === 0) {
+      // Arm at side
+      g.fillStyle(armColor);
+      g.fillRect(cx + 8, 24, 5, 10);
+      // Hand
+      g.fillStyle(o.skin);
+      g.fillRect(cx + 9, 33, 4, 3);
+    } else if (walkFrame === 1) {
+      // Arm swung forward
+      g.fillStyle(armColor);
+      g.fillRect(cx + 8, 22, 5, 10);
+      g.fillStyle(o.skin);
+      g.fillRect(cx + 9, 31, 4, 3);
+    } else {
+      // Arm swung back
+      g.fillStyle(armColor);
+      g.fillRect(cx + 8, 26, 5, 10);
+      g.fillStyle(o.skin);
+      g.fillRect(cx + 9, 35, 4, 3);
+    }
+
+    // === LEGS (from side — one in front, one behind) ===
+    const legY = o.legStartY || 37;
+    const legH = o.legH || 11;
+    // From the side, legs overlap; walk frame shifts them forward/back
+    const frontLegOff = walkFrame === 1 ? -3 : walkFrame === 2 ? 3 : 0;
+    const backLegOff = walkFrame === 1 ? 3 : walkFrame === 2 ? -3 : 0;
+
+    // Waistband
+    if (o.waistColor) {
+      g.fillStyle(o.waistColor);
+      g.fillRect(cx - 8, legY, 18, 3);
+    }
+
+    // Back leg (darker shade)
+    g.fillStyle(o.pantsColor);
+    g.fillRect(cx - 5 + backLegOff, legY, 10, legH);
+    // Front leg
+    g.fillRect(cx - 3 + frontLegOff, legY, 10, legH);
+
+    // === FEET/SHOES ===
+    const shoeY = legY + legH - 2;
+    if (o.shoeColor) {
+      const sh = o.shoeH || 4;
+      g.fillStyle(o.shoeColor);
+      g.fillRect(cx - 5 + backLegOff, shoeY, 10, sh);
+      g.fillRect(cx - 3 + frontLegOff, shoeY, 10, sh);
+      if (o.shoeHighlight) {
+        g.fillStyle(o.shoeHighlight);
+        g.fillRect(cx - 5 + backLegOff, shoeY, 10, 1);
+        g.fillRect(cx - 3 + frontLegOff, shoeY, 10, 1);
+      }
+    } else if (o.footSkin) {
+      g.fillStyle(o.skin);
+      g.fillRect(cx - 4 + backLegOff, shoeY, 8, 2);
+      g.fillRect(cx - 2 + frontLegOff, shoeY, 8, 2);
+    }
+  }
+
+  // ─── CHARACTERS (original static sprites for portraits) ──────────────────
 
   _drawNikitaUnderwear(g) {
     // Hair

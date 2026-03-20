@@ -7,6 +7,8 @@ import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import { AtmosphereManager } from '../systems/AtmosphereManager.js';
 import { RoomRenderer } from '../systems/RoomRenderer.js';
+import { MovementController } from '../systems/MovementController.js';
+import { CharacterAnimator } from '../systems/CharacterAnimator.js';
 import dialogueData from '../data/dialogue.json';
 
 export class HomeScene extends Phaser.Scene {
@@ -81,13 +83,19 @@ export class HomeScene extends Phaser.Scene {
     this.tweens.add({ targets: this.bowlLabel, alpha: { from: 0.5, to: 1 }, yoyo: true, repeat: -1, duration: 800 });
 
     // Player
-    this.player = this.physics.add.sprite(width * 0.8, height * 0.8, 'nikita-dressed');
+    this.player = this.physics.add.sprite(width * 0.8, height * 0.8, 'nikita-dressed-d0');
     this.player.setCollideWorldBounds(true);
     this.player.setDepth(50);
-    this.playerSpeed = 150;
 
     // Shadow under player
     this.playerShadow = this.add.ellipse(this.player.x, this.player.y + 22, 24, 8, 0x000000, 0.2).setDepth(1);
+    this.animator = new CharacterAnimator(this);
+    this.movement = new MovementController(this, this.player, {
+      speed: 165,
+      shadow: { sprite: this.playerShadow, offsetY: 22 },
+      animator: this.animator,
+      animKey: 'nikita-dressed',
+    });
 
     // State
     this.catFed = false;
@@ -130,23 +138,13 @@ export class HomeScene extends Phaser.Scene {
   update(time, delta) {
     if (this.pauseOverlay?.isPaused()) return;
     if (this.frozen || this.dialogue.isActive()) {
-      this.player.setVelocity(0);
+      this.movement.stop();
       return;
     }
 
-    // Sync player shadow
-    if (this.playerShadow) {
-      this.playerShadow.setPosition(this.player.x, this.player.y + 22);
-    }
-
     if (this.phase === 'explore') {
-      // Movement
-      let vx = 0, vy = 0;
-      if (this.inputMgr.isDown('left')) vx = -this.playerSpeed;
-      if (this.inputMgr.isDown('right')) vx = this.playerSpeed;
-      if (this.inputMgr.isDown('up')) vy = -this.playerSpeed;
-      if (this.inputMgr.isDown('down')) vy = this.playerSpeed;
-      this.player.setVelocity(vx, vy);
+      // === PLAYER MOVEMENT ===
+      this.movement.update(this.inputMgr, delta);
 
       // Feed cat interaction
       if (this.inputMgr.justPressed('interact') && !this.catFed) {
@@ -163,7 +161,7 @@ export class HomeScene extends Phaser.Scene {
   _feedCat() {
     this.catFed = true;
     this.frozen = true;
-    this.player.setVelocity(0);
+    this.movement.stop();
     this.bowlLabel.setVisible(false);
     this.audio.playMeow();
 
