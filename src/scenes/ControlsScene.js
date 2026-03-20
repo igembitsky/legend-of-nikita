@@ -38,11 +38,11 @@ export class ControlsScene extends Phaser.Scene {
     // Igor portrait + name
     const portrait = this.add.image(centerX, height * 0.14, 'portrait-igor')
       .setOrigin(0.5)
-      .setDisplaySize(56, 56)
+      .setDisplaySize(80, 80)
       .setAlpha(0);
     this._fadeIn(portrait, delay);
 
-    const speaker = this.add.text(centerX, height * 0.14 + 38, 'IGOR', {
+    const speaker = this.add.text(centerX, height * 0.14 + 50, 'IGOR', {
       fontSize: '11px',
       color: '#ffdd44',
       fontFamily: 'monospace',

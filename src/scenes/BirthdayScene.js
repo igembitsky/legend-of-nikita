@@ -56,18 +56,25 @@ export class BirthdayScene extends Phaser.Scene {
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    // Photo placeholder frame
-    const frameSize = 200;
-    this.add.rectangle(width / 2, height * 0.6, frameSize + 16, frameSize + 16, 0xffcc00).setDepth(10);
-    this.add.rectangle(width / 2, height * 0.6, frameSize + 8, frameSize + 8, 0x000000).setDepth(11);
+    // Photo placeholder frame — preserve aspect ratio
+    const maxSize = 280;
+    const photoY = height * 0.6;
 
-    // Try to load real photo, fallback to placeholder
     if (this.textures.exists('photo')) {
-      this.add.image(width / 2, height * 0.6, 'photo')
-        .setDisplaySize(frameSize, frameSize).setDepth(12);
+      const tex = this.textures.get('photo').getSourceImage();
+      const scale = Math.min(maxSize / tex.width, maxSize / tex.height);
+      const dispW = tex.width * scale;
+      const dispH = tex.height * scale;
+
+      this.add.rectangle(width / 2, photoY, dispW + 16, dispH + 16, 0xffcc00).setDepth(10);
+      this.add.rectangle(width / 2, photoY, dispW + 8, dispH + 8, 0x000000).setDepth(11);
+      this.add.image(width / 2, photoY, 'photo')
+        .setDisplaySize(dispW, dispH).setDepth(12);
     } else {
-      this.add.rectangle(width / 2, height * 0.6, frameSize, frameSize, 0x333333).setDepth(12);
-      this.add.text(width / 2, height * 0.6, 'PHOTO\nHERE', {
+      this.add.rectangle(width / 2, photoY, maxSize + 16, maxSize + 16, 0xffcc00).setDepth(10);
+      this.add.rectangle(width / 2, photoY, maxSize + 8, maxSize + 8, 0x000000).setDepth(11);
+      this.add.rectangle(width / 2, photoY, maxSize, maxSize, 0x333333).setDepth(12);
+      this.add.text(width / 2, photoY, 'PHOTO\nHERE', {
         fontSize: '20px', color: '#666666', fontFamily: 'monospace', align: 'center',
       }).setOrigin(0.5).setDepth(13);
     }

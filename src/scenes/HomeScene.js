@@ -301,28 +301,74 @@ export class HomeScene extends Phaser.Scene {
     this.movement.stop();
     if (this.kissLabel) this.kissLabel.setVisible(false);
 
-    // Heart particles between them
-    const kissX = (this.player.x + this.wifeX) / 2;
-    const kissY = (this.player.y + this.wifeY) / 2;
-    for (let i = 0; i < 6; i++) {
-      const heart = this.add.text(
-        kissX + Phaser.Math.Between(-15, 15),
-        kissY - 10,
-        '❤️',
-        { fontSize: '14px' }
-      ).setDepth(200);
-      this.tweens.add({
-        targets: heart,
-        y: heart.y - 35 - Phaser.Math.Between(0, 20),
-        alpha: 0,
-        duration: 1000,
-        delay: i * 120,
-        onComplete: () => heart.destroy(),
-      });
-    }
+    // Walk Nikita to Sveta
+    this.tweens.add({
+      targets: this.player,
+      x: this.wifeX,
+      y: this.wifeY + 4,
+      duration: 800,
+      ease: 'Sine.easeInOut',
+      onUpdate: () => {
+        this.playerShadow.setPosition(this.player.x, this.player.y + 22);
+      },
+      onComplete: () => {
+        // Merge sprites — slight scale bump
+        this.tweens.add({
+          targets: [this.player, this.wife],
+          scaleX: 1.05,
+          scaleY: 1.05,
+          duration: 300,
+          ease: 'Back.easeOut',
+        });
 
-    // After a beat, lights off
-    this.time.delayedCall(1200, () => this._startEnding());
+        // Gentle sway together
+        this.tweens.add({
+          targets: [this.player, this.wife],
+          x: { from: this.wifeX - 3, to: this.wifeX + 3 },
+          yoyo: true,
+          repeat: -1,
+          duration: 1500,
+          ease: 'Sine.easeInOut',
+        });
+
+        // Warm glow around couple
+        const glow = this.add.circle(this.wifeX, this.wifeY, 60, 0xffaa44, 0)
+          .setDepth(49);
+        this.tweens.add({
+          targets: glow,
+          alpha: 0.15,
+          duration: 800,
+          ease: 'Sine.easeIn',
+        });
+
+        // Massive heart storm — waves of hearts over 5 seconds
+        const spawnHeart = (delay) => {
+          this.time.delayedCall(delay, () => {
+            const size = Phaser.Math.Between(14, 22);
+            const heart = this.add.text(
+              this.wifeX + Phaser.Math.Between(-30, 30),
+              this.wifeY - 5,
+              '❤️',
+              { fontSize: `${size}px` }
+            ).setDepth(200);
+            this.tweens.add({
+              targets: heart,
+              y: heart.y - 50 - Phaser.Math.Between(0, 40),
+              x: heart.x + Phaser.Math.Between(-25, 25),
+              alpha: 0,
+              duration: 1200 + Phaser.Math.Between(0, 600),
+              onComplete: () => heart.destroy(),
+            });
+          });
+        };
+        for (let i = 0; i < 30; i++) {
+          spawnHeart(i * 170);
+        }
+
+        // After ~5s of kissing, start lights out
+        this.time.delayedCall(5200, () => this._startEnding());
+      },
+    });
   }
 
   _startEnding() {
@@ -331,55 +377,86 @@ export class HomeScene extends Phaser.Scene {
     // Stop music as lights dim
     this.audio.stopMusic();
 
-    // Dim lights
+    // Slow darkness — 4 seconds for drama
     const darkness = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0)
       .setDepth(1500);
 
     this.tweens.add({
       targets: darkness,
       alpha: 1,
-      duration: 3000,
+      duration: 4000,
+      ease: 'Sine.easeIn',
       onComplete: () => {
-        // Cat eyes in darkness — at the cat's position
-        const eyeL = this.add.circle(this.cat.x - 8, this.cat.y - 2, 4, 0x44ff44).setDepth(2000).setAlpha(0);
-        const eyeR = this.add.circle(this.cat.x + 8, this.cat.y - 2, 4, 0x44ff44).setDepth(2000).setAlpha(0);
+        // Hold in total darkness for a beat
+        this.time.delayedCall(1000, () => {
+          // Cat eyes fade in
+          const eyeL = this.add.circle(this.cat.x - 8, this.cat.y - 2, 5, 0x44ff44)
+            .setDepth(2000).setAlpha(0);
+          const eyeR = this.add.circle(this.cat.x + 8, this.cat.y - 2, 5, 0x44ff44)
+            .setDepth(2000).setAlpha(0);
 
-        this.tweens.add({
-          targets: [eyeL, eyeR],
-          alpha: { from: 0, to: 1 },
-          duration: 500,
-          onComplete: () => {
-            // Blink animation
-            this.tweens.add({
-              targets: [eyeL, eyeR],
-              alpha: { from: 1, to: 0 },
-              duration: 150,
-              yoyo: true,
-              repeat: 2,
-              repeatDelay: 1000,
-            });
-
-            // Cat says "fucking legend"
-            this.time.delayedCall(1500, () => {
-              const bubble = this.add.text(this.cat.x, this.cat.y - 25, 'fucking legend', {
-                fontSize: '24px',
-                color: '#44ff44',
-                fontFamily: 'monospace',
-                fontStyle: 'bold',
-              }).setOrigin(0.5).setDepth(2000).setAlpha(0);
-
+          this.tweens.add({
+            targets: [eyeL, eyeR],
+            alpha: 1,
+            duration: 600,
+            onComplete: () => {
+              // Subtle glow pulse
               this.tweens.add({
-                targets: bubble,
-                alpha: 1,
+                targets: [eyeL, eyeR],
+                alpha: { from: 0.7, to: 1 },
+                yoyo: true,
+                repeat: -1,
                 duration: 800,
+                ease: 'Sine.easeInOut',
               });
 
-              // Hold then transition
-              this.time.delayedCall(3000, () => {
-                this.transition.fadeToScene('BirthdayScene');
+              // 3 slow deliberate blinks
+              const doBlink = (delay) => {
+                this.time.delayedCall(delay, () => {
+                  this.tweens.add({
+                    targets: [eyeL, eyeR],
+                    alpha: 0,
+                    duration: 100,
+                    onComplete: () => {
+                      this.time.delayedCall(100, () => {
+                        this.tweens.add({
+                          targets: [eyeL, eyeR],
+                          alpha: 1,
+                          duration: 100,
+                        });
+                      });
+                    },
+                  });
+                });
+              };
+              doBlink(1500);
+              doBlink(3000);
+              doBlink(4500);
+
+              // "fucking legend" fades in after blinks
+              this.time.delayedCall(5500, () => {
+                const bubble = this.add.text(this.cat.x, this.cat.y - 30, 'fucking legend', {
+                  fontSize: '28px',
+                  color: '#44ff44',
+                  fontFamily: 'monospace',
+                  fontStyle: 'bold',
+                }).setOrigin(0.5).setDepth(2000).setAlpha(0);
+
+                this.tweens.add({
+                  targets: bubble,
+                  alpha: 1,
+                  duration: 1000,
+                });
+
+                // Hold then transition to BirthdayScene
+                this.time.delayedCall(3500, () => {
+                  this.transition.fadeToScene('BirthdayScene', {
+                    flags: this.gameFlags,
+                  });
+                });
               });
-            });
-          },
+            },
+          });
         });
       },
     });

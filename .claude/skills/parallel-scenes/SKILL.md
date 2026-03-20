@@ -18,8 +18,10 @@ Work on a scene in an isolated git worktree. Run this in each Claude Code tab to
    git worktree add ../legend-of-nikita-<sceneKey> -b scene/<sceneKey>
    ```
 2. Set your working directory to the new worktree.
-3. Start the dev server in the worktree: `npm run dev`
-4. Tell the user: "Working in isolated worktree at `../legend-of-nikita-<sceneKey>` on branch `scene/<sceneKey>`. Dev server: http://localhost:5173/?scene=<SceneName> — Ready for your task."
+3. Install deps and start the dev server in the background: `cd ../legend-of-nikita-<sceneKey> && npm install && npx vite`
+4. Check the dev server output to find the actual port (Vite auto-increments if 5173 is taken).
+5. Open the scene directly in the browser: `open "http://localhost:<port>/?scene=<SceneName>"`
+6. Tell the user: "Working in isolated worktree at `../legend-of-nikita-<sceneKey>` on branch `scene/<sceneKey>`. Dev server: http://localhost:<port>/?scene=<SceneName> (opened in browser) — Ready for your task."
 
 ## File Rules
 
