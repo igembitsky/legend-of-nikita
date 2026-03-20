@@ -31,7 +31,7 @@ export class BirthdayScene extends Phaser.Scene {
     this._createBalloons(width, height);
 
     // Title text
-    const title = this.add.text(width / 2, height * 0.25, 'HAPPY BIRTHDAY NIKITA', {
+    const title = this.add.text(width / 2, height * 0.18, 'HAPPY BIRTHDAY NIKITA', {
       fontSize: '52px',
       color: '#ffcc00',
       fontFamily: 'monospace',
@@ -49,7 +49,7 @@ export class BirthdayScene extends Phaser.Scene {
     });
 
     // Subtitle
-    this.add.text(width / 2, height * 0.35, "YOU'RE A FUCKING LEGEND", {
+    this.add.text(width / 2, height * 0.28, "YOU'RE A FUCKING LEGEND", {
       fontSize: '28px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -57,8 +57,8 @@ export class BirthdayScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Photo placeholder frame — preserve aspect ratio
-    const maxSize = 280;
-    const photoY = height * 0.6;
+    const maxSize = 220;
+    const photoY = height * 0.55;
 
     if (this.textures.exists('photo')) {
       const tex = this.textures.get('photo').getSourceImage();
@@ -80,7 +80,7 @@ export class BirthdayScene extends Phaser.Scene {
     }
 
     // Year badge
-    this.add.text(width / 2, height * 0.82, '~ 31 ~', {
+    this.add.text(width / 2, height * 0.85, '~ 31 ~', {
       fontSize: '36px',
       color: '#ffcc00',
       fontFamily: 'monospace',

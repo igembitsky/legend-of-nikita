@@ -377,6 +377,9 @@ export class HomeScene extends Phaser.Scene {
     // Stop music as lights dim
     this.audio.stopMusic();
 
+    // Clear camera post-FX (vignette) so darkness is truly black
+    this.cameras.main.postFX?.clear();
+
     // Slow darkness — 4 seconds for drama
     const darkness = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0)
       .setDepth(1500);
