@@ -29,18 +29,18 @@ export class OfficeScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
 
-    // Dark carpet floor
+    // Office carpet floor
     RoomRenderer.drawWoodFloor(this, width, height, {
-      baseColor: 0x1a1a22, variation: 4, plankHeight: 60, gapColor: 0x111118,
+      baseColor: 0x4a4a5a, variation: 8, plankHeight: 60, gapColor: 0x3a3a48,
     });
 
     // Ceiling area (dark with fluorescent lights)
     const ceiling = this.add.graphics().setDepth(200);
-    ceiling.fillStyle(0x0a0a15);
+    ceiling.fillStyle(0x3a3a4a);
     ceiling.fillRect(0, 0, width, 30);
 
     // Fluorescent light strips
-    ceiling.fillStyle(0xccddff, 0.4);
+    ceiling.fillStyle(0xccddff, 0.8);
     ceiling.fillRect(200, 5, 120, 8);
     ceiling.fillRect(500, 5, 120, 8);
     ceiling.fillRect(800, 5, 120, 8);
@@ -61,8 +61,8 @@ export class OfficeScene extends Phaser.Scene {
     for (let i = 0; i < 4; i++) {
       const dx = 150 + i * 280;
       const dy = 200;
-      this.add.rectangle(dx, dy, 80, 50, 0x333355);
-      const npc = this.add.sprite(dx, dy - 30, 'office-npc').setAlpha(0.6);
+      this.add.rectangle(dx, dy, 80, 50, 0x556688);
+      const npc = this.add.sprite(dx, dy - 30, 'office-npc').setAlpha(1);
       this.tweens.add({
         targets: npc,
         y: dy - 32,
@@ -74,7 +74,7 @@ export class OfficeScene extends Phaser.Scene {
 
     // Robots in background
     for (let i = 0; i < 2; i++) {
-      const robot = this.add.sprite(100 + i * 900, 350, 'office-robot').setAlpha(0.4);
+      const robot = this.add.sprite(100 + i * 900, 350, 'office-robot').setAlpha(0.8);
       this.tweens.add({
         targets: robot,
         x: robot.x + 200,
@@ -87,7 +87,7 @@ export class OfficeScene extends Phaser.Scene {
     // Nikita at desk (center)
     this.nikita = this.add.sprite(width / 2, 420, 'nikita-dressed');
     this.add.ellipse(width / 2, 420 + 22, 24, 8, 0x000000, 0.15).setDepth(1);
-    this.add.rectangle(width / 2, 450, 100, 60, 0x333355);
+    this.add.rectangle(width / 2, 450, 100, 60, 0x556688);
 
     // Terminal overlay (hidden initially)
     this.terminalBg = this.add.rectangle(width / 2, height / 2, 600, 350, 0x0a0a0a, 0.95)

@@ -42,4 +42,12 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+
+const debugScene = new URLSearchParams(window.location.search).get('scene');
+if (debugScene) {
+  game.events.once('ready', () => {
+    game.scene.start(debugScene);
+  });
+}
+
 export default game;
