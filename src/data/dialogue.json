@@ -140,7 +140,10 @@
   },
   "driving": {
     "morningIntro": [
-      { "speaker": "", "text": "Dutch roads. The final boss.", "style": { "color": "#aaaacc" } }
+      { "speaker": "", "text": "Time to drive to the dojo.", "style": { "color": "#aaaacc" } },
+      { "speaker": "Nikita", "text": "Dutch roads... cyclists everywhere.\nOne wrong move and it's game over." },
+      { "speaker": "", "text": "Use UP/DOWN to switch lanes.\nAvoid cars and bikes.", "style": { "color": "#88aaff" } },
+      { "speaker": "Nikita", "text": "Let's do this." }
     ],
     "eveningIntro": [
       { "speaker": "", "text": "Almost home. Just survive the cyclists... again.", "style": { "color": "#ccaa88" } }
