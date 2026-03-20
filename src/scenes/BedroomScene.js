@@ -224,6 +224,15 @@ export class BedroomScene extends Phaser.Scene {
     const plantY = roomY + roomH - wallT - 20;
     this.add.sprite(plantX, plantY, 'plant').setDepth(10);
 
+    // --- TOILET (next to plant, bottom-left) ---
+    const toiletX = roomX + wallT + 50;
+    const toiletY = roomY + roomH - wallT - 20;
+    this.add.sprite(toiletX, toiletY, 'toilet').setDepth(10);
+    this.add.ellipse(toiletX, toiletY + 14, 24, 8, 0x000000, 0.1).setDepth(1);
+    this.toiletX = toiletX;
+    this.toiletY = toiletY;
+    this.toiletIndicator = this._createSpaceIndicator(toiletX, toiletY - 26);
+
     // =============================================
     // === CAT (wider patrol, more movement) ===
     // =============================================
@@ -270,8 +279,8 @@ export class BedroomScene extends Phaser.Scene {
     });
     this.inBed = true;
 
-    // Show as lying in bed
-    this.player.setScale(1, 0.5).setAlpha(0.6);
+    // Show as lying in bed — squished to look like lying down, proportional to Sveta
+    this.player.setScale(0.8, 0.45).setAlpha(0.6);
 
     // =============================================
     // === OBJECTIVE BANNER (top of screen) ===
@@ -424,10 +433,17 @@ export class BedroomScene extends Phaser.Scene {
     );
     this.doorIndicator.group.setVisible(distDoor < 55);
 
+    const distToilet = Phaser.Math.Distance.Between(
+      this.player.x, this.player.y, this.toiletX, this.toiletY
+    );
+    this.toiletIndicator.group.setVisible(distToilet < 55);
+
     // === INTERACTIONS ===
     if (this.inputMgr.justPressed('interact')) {
       if (!this.dressed && distCloset < 45) {
         this._getDressed();
+      } else if (distToilet < 45) {
+        this._flushToilet();
       } else if (distDoor < 45) {
         this._tryExit();
       }
@@ -460,6 +476,29 @@ export class BedroomScene extends Phaser.Scene {
     // Wife wakes up after meow
     this.time.delayedCall(800, () => {
       this._failStealth();
+    });
+  }
+
+  _flushToilet() {
+    this.frozen = true;
+    this.movement.stop();
+    this.audio.playFlush();
+
+    const flushText = this.add.text(this.toiletX, this.toiletY - 20, 'FLUSH!', {
+      fontSize: '16px', color: '#4488ff', fontFamily: 'monospace', fontStyle: 'bold',
+    }).setOrigin(0.5).setDepth(500);
+
+    this.tweens.add({
+      targets: flushText, y: flushText.y - 20, alpha: 0, duration: 1000,
+      onComplete: () => flushText.destroy(),
+    });
+
+    this.time.delayedCall(600, () => {
+      this.dialogue.startSequence(dialogueData.bedroom.toilet, {
+        onComplete: () => {
+          this._failStealth();
+        },
+      });
     });
   }
 

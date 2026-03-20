@@ -33,73 +33,150 @@ export class KitchenScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
 
-    // Ceramic tile floor (warm morning kitchen)
-    RoomRenderer.drawTileFloor(this, width, height, {
-      tileSize: 48, color1: 0xd0c8b0, color2: 0xc4bca8,
-      groutColor: 0xa09880, groutWidth: 2,
-    });
+    // Room dimensions (match bedroom)
+    const roomW = 520;
+    const roomH = 380;
+    const roomX = (width - roomW) / 2;
+    const roomY = 30;
+    const wallT = 36;
 
-    // Walls (lighter warm tones)
-    RoomRenderer.drawWalls(this, width, height, {
-      wallColor: 0x443830, patternColor: 0x554840,
-      baseboardColor: 0x5a4830, wallThickness: 48,
-      sides: { top: true, left: true, right: true },
-    });
+    // Dark surround
+    this.add.rectangle(width / 2, height / 2, width, height, 0x050508).setDepth(-1);
 
-    // Window above counter area
-    RoomRenderer.drawWindow(this, width / 2, 30, 80, 50, {
-      glassColor: 0x88aacc, lightColor: 0xffdd88,
-      lightRadius: 120, lightAlpha: 0.06, curtainColor: 0xccbb88,
-    });
+    // Ceramic tile floor
+    const floorG = this.add.graphics().setDepth(0);
+    const tileSize = 36;
+    for (let ty = roomY; ty < roomY + roomH; ty += tileSize) {
+      for (let tx = roomX; tx < roomX + roomW; tx += tileSize) {
+        const col = Math.floor((tx - roomX) / tileSize);
+        const row = Math.floor((ty - roomY) / tileSize);
+        const color = (col + row) % 2 === 0 ? 0xd0c8b0 : 0xc4bca8;
+        floorG.fillStyle(color);
+        floorG.fillRect(tx, ty, tileSize, tileSize);
+        // Grout lines
+        floorG.fillStyle(0xa09880);
+        floorG.fillRect(tx, ty, tileSize, 2);
+        floorG.fillRect(tx, ty, 2, tileSize);
+      }
+    }
 
-    // Counter top (enhanced with wood grain)
+    // Walls
+    const wallG = this.add.graphics().setDepth(200);
+    const wallColor = 0x443830;
+    const patternColor = 0x554840;
+    const baseboardColor = 0x5a4830;
+
+    // Top wall
+    wallG.fillStyle(wallColor);
+    wallG.fillRect(roomX, roomY, roomW, wallT);
+    // Wall pattern dots
+    for (let px = roomX + 8; px < roomX + roomW; px += 16) {
+      for (let py = roomY + 6; py < roomY + wallT - 4; py += 10) {
+        wallG.fillStyle(patternColor);
+        wallG.fillRect(px, py, 3, 3);
+      }
+    }
+    // Top baseboard
+    wallG.fillStyle(baseboardColor);
+    wallG.fillRect(roomX, roomY + wallT - 8, roomW, 8);
+
+    // Left wall
+    wallG.fillStyle(wallColor);
+    wallG.fillRect(roomX, roomY, wallT, roomH);
+    wallG.fillStyle(baseboardColor);
+    wallG.fillRect(roomX + wallT - 8, roomY, 8, roomH);
+
+    // Right wall
+    wallG.fillStyle(wallColor);
+    wallG.fillRect(roomX + roomW - wallT, roomY, wallT, roomH);
+    wallG.fillStyle(baseboardColor);
+    wallG.fillRect(roomX + roomW - wallT, roomY, 8, roomH);
+
+    // Bottom wall (with door gap)
+    const doorGap = 48;
+    const doorCenterX = roomX + roomW / 2;
+    wallG.fillStyle(wallColor);
+    wallG.fillRect(roomX, roomY + roomH - wallT, doorCenterX - doorGap / 2 - roomX, wallT);
+    wallG.fillRect(doorCenterX + doorGap / 2, roomY + roomH - wallT, roomX + roomW - doorCenterX - doorGap / 2, wallT);
+
+    // Window (top-center of room)
+    const winX = roomX + roomW / 2;
+    const winY = roomY + 5;
+    const winW = 60;
+    const winH = 26;
+    const winG = this.add.graphics().setDepth(201);
+    // Frame
+    winG.fillStyle(0x5a4a38);
+    winG.fillRect(winX - winW / 2 - 3, winY, winW + 6, winH + 4);
+    // Glass panes
+    winG.fillStyle(0x88aacc);
+    winG.fillRect(winX - winW / 2, winY + 2, winW / 2 - 2, winH);
+    winG.fillRect(winX + 2, winY + 2, winW / 2 - 2, winH);
+    // Light glow
+    this.add.circle(winX, winY + winH / 2, 70, 0xffdd88, 0.06).setDepth(201);
+
+    // Counter top (along inside of top wall)
+    const counterY = roomY + wallT;
+    const counterW = roomW - wallT * 2;
     const cg = this.add.graphics().setDepth(10);
     cg.fillStyle(0x8b7355);
-    cg.fillRect(48, 48, width - 96, 44);
+    cg.fillRect(roomX + wallT, counterY, counterW, 36);
     cg.fillStyle(0x7a6245, 0.5);
-    cg.fillRect(48, 52, width - 96, 1);
-    cg.fillRect(48, 58, width - 96, 1);
-    cg.fillRect(48, 68, width - 96, 1);
+    cg.fillRect(roomX + wallT, counterY + 4, counterW, 1);
+    cg.fillRect(roomX + wallT, counterY + 10, counterW, 1);
+    cg.fillRect(roomX + wallT, counterY + 20, counterW, 1);
 
-    // Fridge (left side)
-    this.fridge = this.physics.add.staticImage(150, 100, 'fridge');
+    // Fridge (left side of counter)
+    const fridgeX = roomX + wallT + 40;
+    const fridgeY = roomY + wallT + 30;
+    this.fridge = this.physics.add.staticImage(fridgeX, fridgeY, 'fridge');
     this.fridge.setDepth(10);
-    RoomRenderer.drawShadow(this, 150, 122, 44, 12);
+    RoomRenderer.drawShadow(this, fridgeX, fridgeY + 22, 36, 10);
     if (!this.gameFlags.banana) {
-      this.fridgeLabel = this.add.text(150, 60, 'SPACE', {
+      this.fridgeLabel = this.add.text(fridgeX, fridgeY - 30, 'SPACE', {
         fontSize: '10px', color: '#ffcc00', fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.tweens.add({ targets: this.fridgeLabel, alpha: { from: 0.5, to: 1 }, yoyo: true, repeat: -1, duration: 800 });
     }
 
-    // Coffee machine (right side)
-    this.coffeeMachine = this.physics.add.staticImage(width - 150, 100, 'coffee-machine');
+    // Coffee machine (right side of counter)
+    const coffeeX = roomX + roomW - wallT - 40;
+    const coffeeY = roomY + wallT + 30;
+    this.coffeeMachine = this.physics.add.staticImage(coffeeX, coffeeY, 'coffee-machine');
     this.coffeeMachine.setDepth(10);
-    RoomRenderer.drawShadow(this, width - 150, 122, 44, 12);
+    RoomRenderer.drawShadow(this, coffeeX, coffeeY + 22, 36, 10);
     if (!this.gameFlags.coffee) {
-      this.coffeeLabel = this.add.text(width - 150, 60, 'SPACE', {
+      this.coffeeLabel = this.add.text(coffeeX, coffeeY - 30, 'SPACE', {
         fontSize: '10px', color: '#ffcc00', fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.tweens.add({ targets: this.coffeeLabel, alpha: { from: 0.5, to: 1 }, yoyo: true, repeat: -1, duration: 800 });
     }
 
     // Door (bottom center)
-    this.door = this.physics.add.staticImage(width / 2, height - 50, 'door');
-    this.door.setDepth(10);
-    this.add.text(width / 2, height - 20, 'EXIT', {
+    const doorX = roomX + roomW / 2;
+    const doorY = roomY + roomH - wallT;
+    this.door = this.physics.add.staticImage(doorX, doorY, 'door');
+    this.door.setDepth(199);
+    this.add.text(doorX, doorY + wallT + 8, 'EXIT', {
       fontSize: '10px', color: '#888888', fontFamily: 'monospace',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(200);
 
     // Player
-    this.player = this.physics.add.sprite(width / 2, height / 2, 'nikita-dressed-d0');
-    this.player.setCollideWorldBounds(true);
+    const spawnX = roomX + roomW / 2;
+    const spawnY = roomY + roomH / 2 + 20;
+    this.player = this.physics.add.sprite(spawnX, spawnY, 'nikita-dressed-d0');
     this.player.setDepth(50);
+    this.player.body.setBoundsRectangle(new Phaser.Geom.Rectangle(
+      roomX + wallT + 14, roomY + wallT + 6,
+      roomW - wallT * 2 - 28, roomH - wallT * 2 - 12
+    ));
+    this.player.setCollideWorldBounds(true);
 
     // Shadow under player
     this.playerShadow = this.add.ellipse(this.player.x, this.player.y + 22, 24, 8, 0x000000, 0.2).setDepth(1);
     this.animator = new CharacterAnimator(this);
     this.movement = new MovementController(this, this.player, {
-      speed: 176,
+      speed: 127,
       shadow: { sprite: this.playerShadow, offsetY: 22 },
       animator: this.animator,
       animKey: 'nikita-dressed',
@@ -155,7 +232,7 @@ export class KitchenScene extends Phaser.Scene {
       // Fridge
       if (!this.gameFlags.banana) {
         const distFridge = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.fridge.x, this.fridge.y);
-        if (distFridge < 60) {
+        if (distFridge < 45) {
           this._collectBanana();
           return;
         }
@@ -164,7 +241,7 @@ export class KitchenScene extends Phaser.Scene {
       // Coffee
       if (!this.gameFlags.coffee) {
         const distCoffee = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.coffeeMachine.x, this.coffeeMachine.y);
-        if (distCoffee < 60) {
+        if (distCoffee < 45) {
           this._collectCoffee();
           return;
         }
@@ -172,7 +249,7 @@ export class KitchenScene extends Phaser.Scene {
 
       // Door
       const distDoor = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.door.x, this.door.y);
-      if (distDoor < 60) {
+      if (distDoor < 45) {
         this._tryExit();
       }
     }

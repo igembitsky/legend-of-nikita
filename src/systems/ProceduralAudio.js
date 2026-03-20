@@ -59,6 +59,24 @@ export class ProceduralAudio {
     osc.stop(now + 0.3);
   }
 
+  playFlush() {
+    const now = this.audioContext.currentTime;
+    this._playTone(80, now, 0.5, 'sawtooth', 0.15);
+    this._playTone(60, now + 0.1, 0.4, 'triangle', 0.1);
+    this._playNoise(0.4, 0.15);
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(100, now + 0.2);
+    osc.frequency.linearRampToValueAtTime(300, now + 0.5);
+    gain.gain.setValueAtTime(0.08, now + 0.2);
+    gain.gain.linearRampToValueAtTime(0, now + 0.5);
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+    osc.start(now + 0.2);
+    osc.stop(now + 0.55);
+  }
+
   playFootstep() {
     this._playNoise(0.03, 0.08);
   }

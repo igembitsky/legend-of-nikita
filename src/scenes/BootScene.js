@@ -42,7 +42,8 @@ export class BootScene extends Phaser.Scene {
     this._generateSprites();
     this._generateUITextures();
 
-    this.scene.start('TitleScene');
+    const skipTo = new URLSearchParams(window.location.search).get('scene');
+    this.scene.start(skipTo || 'TitleScene');
   }
 
   _generateUITextures() {
@@ -156,6 +157,9 @@ export class BootScene extends Phaser.Scene {
 
     // Cat
     this._drawCharacter('cat', (g) => this._drawCat(g), 24, 20);
+
+    // Toilet
+    this._drawCharacter('toilet', (g) => this._drawToilet(g), 24, 32);
 
     // Igor
     this._drawCharacter('igor', (g) => this._drawIgor(g), 32, 48);
@@ -859,54 +863,48 @@ export class BootScene extends Phaser.Scene {
   }
 
   _drawWifeSleeping(g) {
-    // Bed frame (brown)
-    g.fillStyle(0x8b6940);
-    g.fillRect(0, 0, 64, 32);
-    // Mattress
-    g.fillStyle(0xf5f0e8);
-    g.fillRect(2, 2, 60, 28);
-    // Pillow (white/cream)
-    g.fillStyle(0xfffbf0);
-    g.fillRect(4, 3, 18, 14);
-    // Pillow shadow
-    g.fillStyle(0xeee8d8);
-    g.fillRect(4, 14, 18, 3);
-    g.fillRect(18, 3, 4, 14);
-    // Hair on pillow (auburn/red-brown)
+    // Hair spread on pillow (auburn/red-brown) — left side
     g.fillStyle(0x8b3a1a);
-    g.fillRect(6, 4, 14, 6);
-    g.fillRect(5, 6, 4, 8);
+    g.fillRect(2, 2, 18, 8);
+    g.fillRect(1, 5, 5, 10);
+    g.fillRect(16, 4, 6, 6);
     // Face (skin)
     g.fillStyle(0xf0c090);
-    g.fillRect(8, 8, 10, 7);
+    g.fillRect(6, 6, 12, 9);
+    // Cheek blush
+    g.fillStyle(0xf0a880, 0.5);
+    g.fillRect(14, 10, 3, 3);
     // Closed eyes (sleeping)
     g.fillStyle(0x8b6060);
-    g.fillRect(9, 10, 3, 1);
-    g.fillRect(14, 10, 3, 1);
+    g.fillRect(7, 9, 4, 1);
+    g.fillRect(13, 9, 4, 1);
     // Eyelashes
     g.fillStyle(0x553333);
-    g.fillRect(9, 11, 3, 1);
-    g.fillRect(14, 11, 3, 1);
+    g.fillRect(7, 10, 4, 1);
+    g.fillRect(13, 10, 4, 1);
     // Mouth (relaxed, slightly open)
     g.fillStyle(0xcc8877);
-    g.fillRect(11, 13, 4, 1);
-    // Blue blanket
-    g.fillStyle(0x4477bb);
+    g.fillRect(10, 13, 4, 1);
+    // Neck/shoulder visible above blanket
+    g.fillStyle(0xf0c090);
+    g.fillRect(18, 10, 6, 6);
+    // Blanket covering body — matches BedroomScene bed blanket color
+    g.fillStyle(0x6a8abf);
     g.fillRect(4, 16, 56, 14);
     // Blanket folds/highlights
-    g.fillStyle(0x5588cc);
+    g.fillStyle(0x7a9acf);
     g.fillRect(4, 17, 56, 2);
-    g.fillRect(20, 16, 8, 14);
-    g.fillRect(40, 16, 8, 14);
+    g.fillRect(24, 16, 8, 14);
+    g.fillRect(42, 16, 8, 14);
     // Blanket shadow at edge
-    g.fillStyle(0x3366aa);
+    g.fillStyle(0x5a7aaf);
     g.fillRect(4, 28, 56, 2);
-    // Body lump under blanket
-    g.fillStyle(0x4477bb);
-    g.fillRect(22, 16, 38, 13);
-    // Shoulder/arm outline under blanket
-    g.fillStyle(0x3a6aaa);
-    g.fillRect(24, 17, 6, 4);
+    // Body lump under blanket (shoulder/torso shape)
+    g.fillStyle(0x6a8abf);
+    g.fillRect(22, 15, 36, 14);
+    // Shoulder outline under blanket
+    g.fillStyle(0x5a7aaf);
+    g.fillRect(22, 16, 6, 4);
   }
 
   _drawWifeAwake(g) {
@@ -2092,6 +2090,42 @@ export class BootScene extends Phaser.Scene {
     // Stem
     g.fillStyle(0x2a5a2a);
     g.fillRect(11, 14, 2, 10);
+  }
+
+  _drawToilet(g) {
+    // Tank (back)
+    g.fillStyle(0xe8e8e8);
+    g.fillRect(4, 0, 16, 12);
+    // Tank highlight
+    g.fillStyle(0xf4f4f4);
+    g.fillRect(6, 1, 12, 4);
+    // Tank shadow
+    g.fillStyle(0xd0d0d0);
+    g.fillRect(4, 10, 16, 2);
+    // Flush handle
+    g.fillStyle(0xc0c0c0);
+    g.fillRect(18, 3, 4, 2);
+    // Bowl (main body)
+    g.fillStyle(0xf0f0f0);
+    g.fillRect(2, 12, 20, 14);
+    // Bowl inner
+    g.fillStyle(0xd8e8f0);
+    g.fillRect(5, 14, 14, 8);
+    // Seat
+    g.fillStyle(0xe0e0e0);
+    g.fillRect(2, 12, 20, 3);
+    // Seat highlight
+    g.fillStyle(0xfafafa);
+    g.fillRect(4, 12, 16, 1);
+    // Bowl rim at bottom
+    g.fillStyle(0xd0d0d0);
+    g.fillRect(2, 24, 20, 2);
+    // Base
+    g.fillStyle(0xe0e0e0);
+    g.fillRect(4, 26, 16, 6);
+    // Base shadow
+    g.fillStyle(0xc8c8c8);
+    g.fillRect(4, 30, 16, 2);
   }
 
   _drawBed(g) {

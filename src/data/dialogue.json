@@ -19,6 +19,12 @@
     "fail": [
       { "speaker": "", "text": "You woke them up!\nMission failed." }
     ],
+    "toilet": [
+      { "speaker": "", "text": "*FLUSH*", "style": { "color": "#4488ff", "size": "large" } },
+      { "speaker": "Sveta", "text": "...Nikita?" },
+      { "speaker": "Sveta", "text": "It's 5 AM. WHY are you flushing the toilet." },
+      { "speaker": "Nikita", "text": "I... had to go?" }
+    ],
     "failMessages": [
       { "speaker": "", "text": "You woke them up! Mission failed." },
       { "speaker": "", "text": "The cat saw everything. You've been judged." },
