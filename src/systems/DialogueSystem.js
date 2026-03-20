@@ -111,8 +111,7 @@ export class DialogueSystem {
     if (this.portrait) { this.portrait.destroy(); this.portrait = null; }
     const portraitKey = portraitMap[line.speaker] || 'portrait-nikita';
     if (this.scene.textures?.exists(portraitKey)) {
-      const cam = this.scene.cameras.main;
-      this.portrait = this.scene.add.sprite(87, cam.height - 100, portraitKey)
+      this.portrait = this.scene.add.sprite(this._portraitX, this._portraitY, portraitKey)
         .setDisplaySize(80, 80)
         .setScrollFactor(0)
         .setDepth(1002);
@@ -180,6 +179,8 @@ export class DialogueSystem {
     // Portrait area (left side of dialogue box)
     const portraitX = 87;
     const portraitY = boxY;
+    this._portraitX = portraitX;
+    this._portraitY = portraitY;
     if (this.scene.textures.exists('ui-portrait-frame') && this.scene.add.nineslice) {
       this.portraitFrame = this.scene.add.nineslice(
         portraitX, portraitY, 'ui-portrait-frame',
