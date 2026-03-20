@@ -129,6 +129,7 @@ export class DialogueSystem {
 
     // Show choices if present
     this._clearChoices();
+    this.selectedChoiceIndex = 0;
     if (this.hasChoices()) {
       this._showChoices(line.choices);
     }
@@ -294,7 +295,6 @@ export class DialogueSystem {
   _clearChoices() {
     this.choiceTexts.forEach(t => t.destroy());
     this.choiceTexts = [];
-    this.selectedChoiceIndex = 0;
   }
 
   moveChoiceUp() {
