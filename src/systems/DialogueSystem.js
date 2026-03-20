@@ -101,8 +101,8 @@ export class DialogueSystem {
 
     // Portrait mapping
     const portraitMap = {
-      'Nikita': 'nikita-dressed', 'Igor': 'igor', 'Wife': 'wife-standing',
-      'Cat': 'cat', 'Sensei': 'sensei', 'Customer': 'office-npc',
+      'Nikita': 'portrait-nikita', 'Igor': 'portrait-igor', 'Wife': 'portrait-sveta',
+      'Cat': 'cat', 'Sensei': 'portrait-nashebo', 'Customer': 'office-npc',
       'AI': 'office-robot', 'Terminal': 'office-robot',
     };
 

@@ -122,6 +122,10 @@
     ]
   },
   "office": {
+    "greeting": [
+      { "speaker": "GreetBot", "text": "Welcome to Canary HQ!", "style": { "color": "#00cc88" } },
+      { "speaker": "GreetBot", "text": "Your desk is right over there. Have a productive day!", "style": { "color": "#00cc88" } }
+    ],
     "intro": [
       { "speaker": "", "text": "Time to make AI that makes AI.", "style": { "color": "#00ffcc" } }
     ],
