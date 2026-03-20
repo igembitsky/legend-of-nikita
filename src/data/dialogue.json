@@ -173,10 +173,10 @@
   },
   "home": {
     "greeting": [
-      { "speaker": "Wife", "text": "Hey." },
-      { "speaker": "Wife", "text": "How was your day?" },
+      { "speaker": "Sveta", "text": "Hey." },
+      { "speaker": "Sveta", "text": "How was your day?" },
       { "speaker": "Nikita", "text": "Built an AI. It became sentient. Fixed it." },
-      { "speaker": "Wife", "text": "So... normal Tuesday?" },
+      { "speaker": "Sveta", "text": "So... normal Tuesday?" },
       { "speaker": "Nikita", "text": "Normal Tuesday." }
     ],
     "hint": [
@@ -185,8 +185,8 @@
     "catFed": [
       { "speaker": "", "text": "Cat fed. Happiness restored.", "style": { "color": "#ff88aa" } }
     ],
-    "ending": [
-      { "speaker": "Cat", "text": "fucking legend", "style": { "color": "#44ff44" } }
+    "kissHint": [
+      { "speaker": "", "text": "Time to say goodnight.", "style": { "color": "#888888" } }
     ]
   },
   "introCrawl": {

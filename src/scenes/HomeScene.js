@@ -6,7 +6,6 @@ import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import { AtmosphereManager } from '../systems/AtmosphereManager.js';
-import { RoomRenderer } from '../systems/RoomRenderer.js';
 import { MovementController } from '../systems/MovementController.js';
 import { CharacterAnimator } from '../systems/CharacterAnimator.js';
 import dialogueData from '../data/dialogue.json';
@@ -33,37 +32,110 @@ export class HomeScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
 
-    // Warm wood floor
-    RoomRenderer.drawWoodFloor(this, width, height, {
-      baseColor: 0x6a4a30, variation: 10, plankHeight: 48, gapColor: 0x3a2a18,
-    });
+    // === ROOM DIMENSIONS (bigger than bedroom) ===
+    const roomW = 620;
+    const roomH = 460;
+    const roomX = (width - roomW) / 2;
+    const roomY = 20;
+    const wallT = 40;
 
-    // Walls (warm cream tones)
-    RoomRenderer.drawWalls(this, width, height, {
-      wallColor: 0x443830, patternColor: 0x4a3e35,
-      baseboardColor: 0x5a4830, wallThickness: 48,
-    });
+    // Dark surround
+    this.add.rectangle(width / 2, height / 2, width, height, 0x050508).setDepth(-1);
 
-    // Window with warm evening light
-    RoomRenderer.drawWindow(this, width - 48, 200, 80, 100, {
-      glassColor: 0x664422, lightColor: 0xffaa44,
-      lightRadius: 180, lightAlpha: 0.08, curtainColor: 0x886644,
-    });
+    // === FLOOR (warm wood planks) ===
+    const floorX = roomX + wallT;
+    const floorY = roomY + wallT;
+    const floorW = roomW - wallT * 2;
+    const floorH = roomH - wallT * 2;
+    const floorG = this.add.graphics().setDepth(0);
+    for (let py = floorY; py < floorY + floorH; py += 48) {
+      const shade = Math.floor(Math.random() * 10) - 5;
+      const color = ((0x6a + shade) << 16) | ((0x4a + shade) << 8) | (0x30 + shade);
+      floorG.fillStyle(color);
+      const plankH = Math.min(47, floorY + floorH - py - 1);
+      floorG.fillRect(floorX, py, floorW, plankH);
+      floorG.fillStyle(0x3a2a18);
+      floorG.fillRect(floorX, py + plankH, floorW, 1);
+      const offset = (Math.floor((py - floorY) / 48) % 2) * 120;
+      floorG.fillStyle(0x3a2a18, 0.4);
+      for (let jx = floorX + offset + 140; jx < floorX + floorW; jx += 240) {
+        floorG.fillRect(jx, py, 1, plankH);
+      }
+    }
+
+    // === WALLS ===
+    const wallG = this.add.graphics().setDepth(200);
+    // Top wall
+    wallG.fillStyle(0x443830);
+    wallG.fillRect(roomX, roomY, roomW, wallT);
+    wallG.fillStyle(0x4a3e35, 0.3);
+    for (let wx = roomX; wx < roomX + roomW; wx += 20) {
+      for (let wy = roomY + 4; wy < roomY + wallT - 4; wy += 14) {
+        wallG.fillRect(wx + 8, wy, 3, 3);
+      }
+    }
+    wallG.fillStyle(0x5a4830);
+    wallG.fillRect(roomX, roomY + wallT - 8, roomW, 8);
+    // Left wall
+    wallG.fillStyle(0x443830);
+    wallG.fillRect(roomX, roomY, wallT, roomH);
+    wallG.fillStyle(0x5a4830);
+    wallG.fillRect(roomX + wallT - 8, roomY, 8, roomH);
+    // Right wall
+    wallG.fillStyle(0x443830);
+    wallG.fillRect(roomX + roomW - wallT, roomY, wallT, roomH);
+    wallG.fillStyle(0x5a4830);
+    wallG.fillRect(roomX + roomW - wallT, roomY, 8, roomH);
+    // Bottom wall
+    wallG.fillStyle(0x443830);
+    wallG.fillRect(roomX, roomY + roomH - wallT, roomW, wallT);
+
+    // === WINDOW (top wall, right side) ===
+    const winX = roomX + roomW - 140;
+    const winG = this.add.graphics().setDepth(201);
+    winG.fillStyle(0x5a4830);
+    winG.fillRect(winX - 30, roomY + 3, 60, 34);
+    winG.fillStyle(0x664422);
+    winG.fillRect(winX - 27, roomY + 5, 24, 30);
+    winG.fillRect(winX + 3, roomY + 5, 24, 30);
+    winG.fillStyle(0x5a4830);
+    winG.fillRect(winX - 1, roomY + 5, 2, 30);
+    // Warm evening light glow
+    this.add.circle(winX, roomY + wallT + 50, 100, 0xffaa44, 0.06).setDepth(1);
 
     // Warm ambient overlay
     this.add.rectangle(width / 2, height / 2, width, height, 0xffaa44, 0.04).setDepth(3);
 
-    // Couch
+    // === DOOR / ENTRANCE (bottom wall, center) ===
+    const doorX = roomX + roomW / 2;
+    const doorY = roomY + roomH - wallT;
+    const doorG = this.add.graphics().setDepth(199);
+    // Opening in wall
+    doorG.fillStyle(0x0e0e1a);
+    doorG.fillRect(doorX - 24, doorY - 2, 48, wallT + 4);
+    // Frame
+    doorG.fillStyle(0x5a4030);
+    doorG.fillRect(doorX - 26, doorY - 4, 4, wallT + 8);
+    doorG.fillRect(doorX + 22, doorY - 4, 4, wallT + 8);
+    doorG.fillRect(doorX - 26, doorY - 4, 52, 4);
+
+    // === COUCH (left side of room) ===
+    const couchX = roomX + wallT + 30;
+    const couchY = roomY + roomH / 2 - 20;
     const couch = this.add.graphics().setDepth(10);
     couch.fillStyle(0x554433);
-    couch.fillRoundedRect(100, 300, 160, 60, 8);
+    couch.fillRoundedRect(couchX, couchY, 160, 60, 8);
     couch.fillStyle(0x665544);
-    couch.fillRoundedRect(100, 295, 160, 20, 6); // back cushion
-    RoomRenderer.drawShadow(this, 180, 365, 160, 20);
+    couch.fillRoundedRect(couchX, couchY - 5, 160, 20, 6); // back cushion
+    this.add.ellipse(couchX + 80, couchY + 65, 160, 20, 0x000000, 0.1).setDepth(1);
 
-    // Wife
-    this.wife = this.add.sprite(width * 0.3, height * 0.4, 'wife-standing');
-    this.add.ellipse(width * 0.3, height * 0.4 + 22, 24, 8, 0x000000, 0.15).setDepth(1);
+    // === WIFE (near couch, standing) ===
+    const wifeX = roomX + wallT + 110;
+    const wifeY = roomY + wallT + 80;
+    this.wifeX = wifeX;
+    this.wifeY = wifeY;
+    this.wife = this.add.sprite(wifeX, wifeY, 'wife-standing');
+    this.add.ellipse(wifeX, wifeY + 22, 24, 8, 0x000000, 0.15).setDepth(1);
     this.tweens.add({
       targets: this.wife,
       scaleY: { from: 1, to: 1.015 },
@@ -74,17 +146,23 @@ export class HomeScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
-    // Cat near food bowl
-    this.cat = this.add.sprite(width * 0.6, height * 0.6, 'cat');
-    this.foodBowl = this.physics.add.staticImage(width * 0.6 + 30, height * 0.6 + 10, 'food-bowl');
-    this.bowlLabel = this.add.text(width * 0.6 + 30, height * 0.6 - 15, 'SPACE', {
+    // === CAT + FOOD BOWL (right side of room) ===
+    const catX = roomX + roomW - wallT - 100;
+    const catY = roomY + roomH / 2 + 20;
+    this.cat = this.add.sprite(catX, catY, 'cat');
+    this.foodBowl = this.physics.add.staticImage(catX + 30, catY + 10, 'food-bowl');
+    this.bowlLabel = this.add.text(catX + 30, catY - 15, 'SPACE', {
       fontSize: '10px', color: '#ffcc00', fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.tweens.add({ targets: this.bowlLabel, alpha: { from: 0.5, to: 1 }, yoyo: true, repeat: -1, duration: 800 });
 
-    // Player
-    this.player = this.physics.add.sprite(width * 0.8, height * 0.8, 'nikita-dressed-d0');
+    // === PLAYER (enters from bottom door) ===
+    this.player = this.physics.add.sprite(doorX, doorY - 20, 'nikita-dressed-d0');
     this.player.setCollideWorldBounds(true);
+    this.player.body.setBoundsRectangle(new Phaser.Geom.Rectangle(
+      roomX + wallT + 14, roomY + wallT + 6,
+      roomW - wallT * 2 - 28, roomH - wallT * 2 - 12
+    ));
     this.player.setDepth(50);
 
     // Shadow under player
@@ -99,7 +177,7 @@ export class HomeScene extends Phaser.Scene {
 
     // State
     this.catFed = false;
-    this.phase = 'explore'; // explore → catFed → ending
+    this.phase = 'explore'; // explore → goKiss → ending
     this.frozen = false;
 
     // Auto-save at scene start
@@ -143,7 +221,6 @@ export class HomeScene extends Phaser.Scene {
     }
 
     if (this.phase === 'explore') {
-      // === PLAYER MOVEMENT ===
       this.movement.update(this.inputMgr, delta);
 
       // Feed cat interaction
@@ -151,6 +228,18 @@ export class HomeScene extends Phaser.Scene {
         const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.foodBowl.x, this.foodBowl.y);
         if (dist < 50) {
           this._feedCat();
+        }
+      }
+
+      this.inputMgr.clearJustPressed();
+    } else if (this.phase === 'goKiss') {
+      this.movement.update(this.inputMgr, delta);
+
+      // Kiss wife interaction
+      if (this.inputMgr.justPressed('interact')) {
+        const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.wifeX, this.wifeY);
+        if (dist < 45) {
+          this._kissWife();
         }
       }
 
@@ -185,9 +274,55 @@ export class HomeScene extends Phaser.Scene {
 
     this.dialogue.startSequence(dialogueData.home.catFed, {
       onComplete: () => {
-        this.time.delayedCall(1000, () => this._startEnding());
+        if (dialogueData.home.kissHint) {
+          this.dialogue.startSequence(dialogueData.home.kissHint, {
+            onComplete: () => this._enterKissPhase(),
+          });
+        } else {
+          this._enterKissPhase();
+        }
       },
     });
+  }
+
+  _enterKissPhase() {
+    this.phase = 'goKiss';
+    this.frozen = false;
+    // Show SPACE hint near wife
+    this.kissLabel = this.add.text(this.wifeX, this.wifeY - 30, 'SPACE', {
+      fontSize: '10px', color: '#ffcc00', fontFamily: 'monospace',
+    }).setOrigin(0.5).setDepth(100);
+    this.tweens.add({ targets: this.kissLabel, alpha: { from: 0.5, to: 1 }, yoyo: true, repeat: -1, duration: 800 });
+  }
+
+  _kissWife() {
+    this.phase = 'ending';
+    this.frozen = true;
+    this.movement.stop();
+    if (this.kissLabel) this.kissLabel.setVisible(false);
+
+    // Heart particles between them
+    const kissX = (this.player.x + this.wifeX) / 2;
+    const kissY = (this.player.y + this.wifeY) / 2;
+    for (let i = 0; i < 6; i++) {
+      const heart = this.add.text(
+        kissX + Phaser.Math.Between(-15, 15),
+        kissY - 10,
+        '❤️',
+        { fontSize: '14px' }
+      ).setDepth(200);
+      this.tweens.add({
+        targets: heart,
+        y: heart.y - 35 - Phaser.Math.Between(0, 20),
+        alpha: 0,
+        duration: 1000,
+        delay: i * 120,
+        onComplete: () => heart.destroy(),
+      });
+    }
+
+    // After a beat, lights off
+    this.time.delayedCall(1200, () => this._startEnding());
   }
 
   _startEnding() {
@@ -205,9 +340,9 @@ export class HomeScene extends Phaser.Scene {
       alpha: 1,
       duration: 3000,
       onComplete: () => {
-        // Cat eyes in darkness
-        const eyeL = this.add.circle(width / 2 - 8, height / 2, 4, 0x44ff44).setDepth(2000).setAlpha(0);
-        const eyeR = this.add.circle(width / 2 + 8, height / 2, 4, 0x44ff44).setDepth(2000).setAlpha(0);
+        // Cat eyes in darkness — at the cat's position
+        const eyeL = this.add.circle(this.cat.x - 8, this.cat.y - 2, 4, 0x44ff44).setDepth(2000).setAlpha(0);
+        const eyeR = this.add.circle(this.cat.x + 8, this.cat.y - 2, 4, 0x44ff44).setDepth(2000).setAlpha(0);
 
         this.tweens.add({
           targets: [eyeL, eyeR],
@@ -224,9 +359,9 @@ export class HomeScene extends Phaser.Scene {
               repeatDelay: 1000,
             });
 
-            // Speech bubble
+            // Cat says "fucking legend"
             this.time.delayedCall(1500, () => {
-              const bubble = this.add.text(width / 2, height / 2 - 40, 'fucking legend', {
+              const bubble = this.add.text(this.cat.x, this.cat.y - 25, 'fucking legend', {
                 fontSize: '24px',
                 color: '#44ff44',
                 fontFamily: 'monospace',
