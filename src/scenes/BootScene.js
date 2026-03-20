@@ -29,12 +29,12 @@ export class BootScene extends Phaser.Scene {
       loadingText.destroy();
     });
 
-    // Photo placeholder
-    this.load.image('photo', 'photo-placeholder.png');
-
-    // Load real assets here as they become available
-    // this.load.image('nikita-pajamas', 'assets/sprites/nikita-pajamas.png');
-    // etc.
+    // Character portraits (real photos)
+    this.load.image('portrait-nikita', 'portrait-nikita.png');
+    this.load.image('portrait-sveta', 'portrait-sveta.png');
+    this.load.image('portrait-igor', 'portrait-igor.jpg');
+    this.load.image('portrait-nashebo', 'portrait-nashebo.png');
+    this.load.image('photo', 'birthday-selfie.png');
   }
 
   create() {
