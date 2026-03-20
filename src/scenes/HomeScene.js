@@ -374,98 +374,96 @@ export class HomeScene extends Phaser.Scene {
   _startEnding() {
     const { width, height } = this.cameras.main;
 
-    // Stop music as lights dim
+    // Stop music
     this.audio.stopMusic();
 
-    // Create an overlay camera for cat eyes (immune to main camera fade)
-    const overlayCam = this.cameras.add(0, 0, width, height);
-    overlayCam.setBackgroundColor('rgba(0,0,0,0)');
+    // Full-screen black rectangle pinned to camera, above everything
+    // Note: fillAlpha must be 1 (opaque fill), then control visibility via game object alpha
+    const darkness = this.add.rectangle(width / 2, height / 2, width + 200, height + 200, 0x000000, 1)
+      .setDepth(5000)
+      .setScrollFactor(0)
+      .setAlpha(0);
 
-    // Tag overlay objects so only the overlay camera shows them
-    const overlayObjects = [];
-    const mainCam = this.cameras.main;
+    this.tweens.add({
+      targets: darkness,
+      alpha: 1,
+      duration: 4000,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        // Hold in total darkness for a beat
+        this.time.delayedCall(1000, () => {
+          // Cat eyes centered on screen
+          const eyeCX = width / 2;
+          const eyeCY = height / 2;
+          const eyeL = this.add.circle(eyeCX - 8, eyeCY, 5, 0x44ff44)
+            .setDepth(5001).setScrollFactor(0).setAlpha(0);
+          const eyeR = this.add.circle(eyeCX + 8, eyeCY, 5, 0x44ff44)
+            .setDepth(5001).setScrollFactor(0).setAlpha(0);
 
-    // Fade main camera to black over 4 seconds
-    mainCam.fade(4000, 0, 0, 0, false);
-
-    // After fade completes, show cat eyes on overlay camera
-    mainCam.once('camerafadeoutcomplete', () => {
-      // Hold in total darkness for a beat
-      this.time.delayedCall(1000, () => {
-        // Cat eyes — centered on screen since camera may have shifted
-        const eyeCX = width / 2;
-        const eyeCY = height / 2;
-        const eyeL = this.add.circle(eyeCX - 8, eyeCY, 5, 0x44ff44).setAlpha(0);
-        const eyeR = this.add.circle(eyeCX + 8, eyeCY, 5, 0x44ff44).setAlpha(0);
-
-        // Only show eyes on overlay camera, not the faded main camera
-        mainCam.ignore([eyeL, eyeR]);
-
-        this.tweens.add({
-          targets: [eyeL, eyeR],
-          alpha: 1,
-          duration: 600,
-          onComplete: () => {
-            // Subtle glow pulse
-            this.tweens.add({
-              targets: [eyeL, eyeR],
-              alpha: { from: 0.7, to: 1 },
-              yoyo: true,
-              repeat: -1,
-              duration: 800,
-              ease: 'Sine.easeInOut',
-            });
-
-            // 3 slow deliberate blinks
-            const doBlink = (delay) => {
-              this.time.delayedCall(delay, () => {
-                this.tweens.add({
-                  targets: [eyeL, eyeR],
-                  alpha: 0,
-                  duration: 100,
-                  onComplete: () => {
-                    this.time.delayedCall(100, () => {
-                      this.tweens.add({
-                        targets: [eyeL, eyeR],
-                        alpha: 1,
-                        duration: 100,
-                      });
-                    });
-                  },
-                });
-              });
-            };
-            doBlink(1500);
-            doBlink(3000);
-            doBlink(4500);
-
-            // "fucking legend" fades in after blinks
-            this.time.delayedCall(5500, () => {
-              const bubble = this.add.text(eyeCX, eyeCY + 30, 'fucking legend', {
-                fontSize: '28px',
-                color: '#44ff44',
-                fontFamily: 'monospace',
-                fontStyle: 'bold',
-              }).setOrigin(0.5).setAlpha(0);
-
-              mainCam.ignore(bubble);
-
+          this.tweens.add({
+            targets: [eyeL, eyeR],
+            alpha: 1,
+            duration: 600,
+            onComplete: () => {
+              // Subtle glow pulse
               this.tweens.add({
-                targets: bubble,
-                alpha: 1,
-                duration: 1000,
+                targets: [eyeL, eyeR],
+                alpha: { from: 0.7, to: 1 },
+                yoyo: true,
+                repeat: -1,
+                duration: 800,
+                ease: 'Sine.easeInOut',
               });
 
-              // Hold then transition to BirthdayScene
-              this.time.delayedCall(3500, () => {
-                this.transition.fadeToScene('BirthdayScene', {
-                  flags: this.gameFlags,
+              // 3 slow deliberate blinks
+              const doBlink = (delay) => {
+                this.time.delayedCall(delay, () => {
+                  this.tweens.add({
+                    targets: [eyeL, eyeR],
+                    alpha: 0,
+                    duration: 100,
+                    onComplete: () => {
+                      this.time.delayedCall(100, () => {
+                        this.tweens.add({
+                          targets: [eyeL, eyeR],
+                          alpha: 1,
+                          duration: 100,
+                        });
+                      });
+                    },
+                  });
+                });
+              };
+              doBlink(1500);
+              doBlink(3000);
+              doBlink(4500);
+
+              // "fucking legend" fades in after blinks
+              this.time.delayedCall(5500, () => {
+                const bubble = this.add.text(eyeCX, eyeCY + 30, 'fucking legend', {
+                  fontSize: '28px',
+                  color: '#44ff44',
+                  fontFamily: 'monospace',
+                  fontStyle: 'bold',
+                }).setOrigin(0.5).setDepth(5001).setScrollFactor(0).setAlpha(0);
+
+                this.tweens.add({
+                  targets: bubble,
+                  alpha: 1,
+                  duration: 1000,
+                });
+
+                // Hold then transition to BirthdayScene
+                this.time.delayedCall(3500, () => {
+                  this.transition.fadeToScene('BirthdayScene', {
+                    flags: this.gameFlags,
+                  });
                 });
               });
-            });
-          },
+            },
+          });
         });
-      });
+      },
     });
   }
 }
