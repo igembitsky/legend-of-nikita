@@ -36,13 +36,10 @@ export class AtmosphereManager {
     driving: {
       vignette: { radius: 0.9, strength: 0.25 },
     },
-    dojo: {
-      bloom: { strength: 0.5, blurStrength: 0.5 },
-      vignette: { radius: 0.95, strength: 0.15 },
-    },
+    dojo: {},
     office: {
-      vignette: { radius: 0.7, strength: 0.5 },
-      bloom: { color: 0x00ffcc, strength: 0.3, blurStrength: 0.8 },
+      vignette: { radius: 0.95, strength: 0.15 },
+      bloom: { color: 0x00ffcc, strength: 0.15, blurStrength: 0.4 },
     },
     home: {
       vignette: { radius: 0.85, strength: 0.35 },

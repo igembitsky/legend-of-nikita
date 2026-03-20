@@ -105,7 +105,20 @@
     "outcome": [
       { "speaker": "Igor", "text": "…yeah, that's fair." },
       { "speaker": "", "text": "*tap*", "style": { "color": "#ffcc00" } },
-      { "speaker": "Sensei", "text": "You kept jiu-jitsu gay today." }
+      { "speaker": "Nashebo", "text": "You kept jiu-jitsu gay today." }
+    ],
+    "lockerChange": [
+      { "speaker": "", "text": "GI ACQUIRED", "style": { "color": "#ffcc00", "size": "large" } },
+      { "speaker": "Nikita", "text": "Bright white. Blue belt. Fresh laundry smell.\nI look incredible." },
+      { "speaker": "", "text": "Confidence: maximum.", "style": { "color": "#44ff44" } }
+    ],
+    "senseiGreet": [
+      { "speaker": "Nashebo", "text": "Nikita. Good, you're here." },
+      { "speaker": "Nashebo", "text": "Igor's warming up at the far end. Don't keep him waiting." },
+      { "speaker": "Nikita", "text": "Oss." }
+    ],
+    "matGate": [
+      { "speaker": "Nikita", "text": "Can't step on the mat in street clothes. Need to change first." }
     ]
   },
   "office": {
