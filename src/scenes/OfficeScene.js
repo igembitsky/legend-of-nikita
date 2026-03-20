@@ -1,11 +1,14 @@
 import Phaser from 'phaser';
 import { DialogueSystem } from '../systems/DialogueSystem.js';
+import { InputManager } from '../systems/InputManager.js';
 import { TransitionManager } from '../systems/TransitionManager.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PauseOverlay } from '../systems/PauseOverlay.js';
 import { ProceduralAudio } from '../systems/ProceduralAudio.js';
 import { AtmosphereManager } from '../systems/AtmosphereManager.js';
 import { RoomRenderer } from '../systems/RoomRenderer.js';
+import { MovementController } from '../systems/MovementController.js';
+import { CharacterAnimator } from '../systems/CharacterAnimator.js';
 import dialogueData from '../data/dialogue.json';
 
 export class OfficeScene extends Phaser.Scene {
@@ -18,6 +21,7 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   create() {
+    this.inputMgr = new InputManager(this);
     this.transition = new TransitionManager(this);
     this.dialogue = new DialogueSystem(this);
     this.save = new SaveSystem();
@@ -34,60 +38,123 @@ export class OfficeScene extends Phaser.Scene {
       baseColor: 0x4a4a5a, variation: 8, plankHeight: 60, gapColor: 0x3a3a48,
     });
 
-    // Ceiling area (dark with fluorescent lights)
+    // Ceiling strip with fluorescent lights
     const ceiling = this.add.graphics().setDepth(200);
     ceiling.fillStyle(0x3a3a4a);
     ceiling.fillRect(0, 0, width, 30);
-
-    // Fluorescent light strips
     ceiling.fillStyle(0xccddff, 0.8);
     ceiling.fillRect(200, 5, 120, 8);
     ceiling.fillRect(500, 5, 120, 8);
     ceiling.fillRect(800, 5, 120, 8);
 
-    // Neon accent strips (enhanced)
+    // Neon accent strips
     const neon = this.add.graphics().setDepth(201);
     neon.fillStyle(0x00ffcc, 0.4);
     neon.fillRect(0, 28, width, 3);
     neon.fillStyle(0xff00cc, 0.3);
     neon.fillRect(0, height - 3, width, 3);
-
-    // Side neon strips
     neon.fillStyle(0x00ffcc, 0.15);
     neon.fillRect(0, 0, 3, height);
     neon.fillRect(width - 3, 0, 3, height);
 
-    // Desks with NPCs
-    for (let i = 0; i < 4; i++) {
-      const dx = 150 + i * 280;
-      const dy = 200;
-      this.add.rectangle(dx, dy, 80, 50, 0x556688);
-      const npc = this.add.sprite(dx, dy - 30, 'office-npc').setAlpha(1);
-      this.tweens.add({
-        targets: npc,
-        y: dy - 32,
-        yoyo: true,
-        repeat: -1,
-        duration: 300 + i * 100,
-      });
+    // Door on right wall
+    const doorX = width - 20;
+    const doorY = height / 2 - 30;
+    const doorG = this.add.graphics().setDepth(10);
+    doorG.fillStyle(0x6a5a40);
+    doorG.fillRect(doorX - 5, doorY, 30, 70);
+    doorG.fillStyle(0x8a7a60);
+    doorG.fillRect(doorX - 5, doorY, 30, 3);
+    doorG.fillRect(doorX - 5, doorY + 67, 30, 3);
+    doorG.fillRect(doorX - 5, doorY, 3, 70);
+    // Door handle
+    doorG.fillStyle(0xccaa44);
+    doorG.fillRect(doorX, doorY + 32, 4, 6);
+
+    // Two rows of desks with code monkeys
+    const deskRow1Y = 160;
+    const deskRow2Y = 300;
+    const deskStartX = 120;
+    const deskSpacing = 200;
+    const numDesks = 4;
+
+    for (let row = 0; row < 2; row++) {
+      const dy = row === 0 ? deskRow1Y : deskRow2Y;
+      for (let i = 0; i < numDesks; i++) {
+        const dx = deskStartX + i * deskSpacing;
+        // Desk
+        this.add.rectangle(dx, dy, 80, 50, 0x556688).setDepth(5);
+        // Shadow under desk
+        this.add.ellipse(dx, dy + 28, 70, 10, 0x000000, 0.15).setDepth(1);
+        // Code monkey NPC
+        const npc = this.add.sprite(dx, dy - 30, 'office-npc').setDepth(10);
+        // Feverish typing animation (fast bobbing)
+        this.tweens.add({
+          targets: npc,
+          y: dy - 33,
+          yoyo: true,
+          repeat: -1,
+          duration: 200 + Math.random() * 150,
+          ease: 'Sine.easeInOut',
+        });
+      }
     }
 
-    // Robots in background
-    for (let i = 0; i < 2; i++) {
-      const robot = this.add.sprite(100 + i * 900, 350, 'office-robot').setAlpha(0.8);
-      this.tweens.add({
-        targets: robot,
-        x: robot.x + 200,
-        yoyo: true,
-        repeat: -1,
-        duration: 4000 + i * 1000,
-      });
-    }
+    // Nikita's empty desk (far left, between the two rows)
+    this.deskX = 60;
+    this.deskY = (deskRow1Y + deskRow2Y) / 2;
+    this.add.rectangle(this.deskX, this.deskY, 80, 50, 0x7788aa)
+      .setStrokeStyle(2, 0x99aacc).setDepth(5);
+    this.add.ellipse(this.deskX, this.deskY + 28, 70, 10, 0x000000, 0.15).setDepth(1);
+    // "your desk" label
+    this.add.text(this.deskX, this.deskY + 35, 'your desk', {
+      fontSize: '9px', color: '#ccaa44', fontFamily: 'monospace',
+    }).setOrigin(0.5).setDepth(10);
+    // SPACE indicator
+    this.deskIndicator = this._createSpaceIndicator(this.deskX, this.deskY - 40);
 
-    // Nikita at desk (center)
-    this.nikita = this.add.sprite(width / 2, 420, 'nikita-dressed');
-    this.add.ellipse(width / 2, 420 + 22, 24, 8, 0x000000, 0.15).setDepth(1);
-    this.add.rectangle(width / 2, 450, 100, 60, 0x556688);
+    // Greeting bot (positioned ~180px left of door, well inside room)
+    this.botX = width - 220;
+    this.botY = height / 2 - 10;
+    this.bot = this.add.sprite(this.botX, this.botY, 'office-robot').setDepth(10);
+    this.botGreeted = false;
+    // Idle hover animation
+    this.tweens.add({
+      targets: this.bot,
+      y: this.botY - 4,
+      yoyo: true,
+      repeat: -1,
+      duration: 1200,
+      ease: 'Sine.easeInOut',
+    });
+
+    // Player spawns near door
+    const spawnX = width - 80;
+    const spawnY = height / 2 - 10;
+    this.player = this.physics.add.sprite(spawnX, spawnY, 'nikita-dressed-d0').setDepth(50);
+    this.player.setCollideWorldBounds(true);
+    this.player.body.setBoundsRectangle(new Phaser.Geom.Rectangle(
+      20, 50, width - 60, height - 100
+    ));
+
+    this.playerShadow = this.add.ellipse(spawnX, spawnY + 22, 24, 8, 0x000000, 0.2).setDepth(1);
+    this.animator = new CharacterAnimator(this);
+    this.movement = new MovementController(this, this.player, {
+      speed: 127,
+      shadow: { sprite: this.playerShadow, offsetY: 22 },
+      animator: this.animator,
+      animKey: 'nikita-dressed',
+    });
+
+    // State
+    this.frozen = false;
+    this.seated = false;
+
+    // Objective banner
+    this.objectiveBg = this.add.rectangle(width / 2, 10, 340, 22, 0x000000, 0.6).setDepth(950);
+    this.objectiveText = this.add.text(width / 2, 10, '🎯 Find your desk', {
+      fontSize: '11px', color: '#ccaa44', fontFamily: 'monospace',
+    }).setOrigin(0.5).setDepth(951);
 
     // Terminal overlay (hidden initially)
     this.terminalBg = this.add.rectangle(width / 2, height / 2, 600, 350, 0x0a0a0a, 0.95)
@@ -103,18 +170,15 @@ export class OfficeScene extends Phaser.Scene {
     this.redOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0xff0000, 0)
       .setDepth(400);
 
-    // Scripted sequence
+    // Scripted sequence state (used after sitting)
     this.step = 0;
     this.waitingForInput = false;
     this.recoveryStage = 0;
 
-    // Start with intro dialogue
-    this.time.delayedCall(1000, () => this._nextStep());
-
+    // Dialogue advance + interaction handlers
     this.input.keyboard.on('keydown-ENTER', () => {
       if (this.waitingForInput) {
         this.waitingForInput = false;
-        // If we're in recovery (step 9), advance recovery stages instead of nextStep
         if (this.step === 9 && this.recoveryStage > 0 && this.recoveryStage < 3) {
           this._nextRecoveryStage();
         } else {
@@ -136,12 +200,102 @@ export class OfficeScene extends Phaser.Scene {
     this.pauseOverlay = new PauseOverlay(this, () => ({
       scene: this.scene.key,
       flags: this.gameFlags,
-      position: undefined,
+      position: this.player ? { x: this.player.x, y: this.player.y } : undefined,
     }));
   }
 
   update(time, delta) {
     if (this.pauseOverlay?.isPaused()) return;
+    if (this.seated) return; // Scripted sequence controls everything after sitting
+
+    if (this.frozen || this.dialogue.isActive()) {
+      this.movement.stop();
+      return;
+    }
+
+    // Player movement
+    this.movement.update(this.inputMgr, delta);
+
+    // Bot greeting auto-cutscene
+    if (!this.botGreeted) {
+      const distBot = Phaser.Math.Distance.Between(
+        this.player.x, this.player.y, this.botX, this.botY
+      );
+      if (distBot < 80) {
+        this._triggerBotGreeting();
+        return;
+      }
+    }
+
+    // Desk interaction
+    const distDesk = Phaser.Math.Distance.Between(
+      this.player.x, this.player.y, this.deskX, this.deskY
+    );
+    this.deskIndicator.group.setVisible(distDesk < 55);
+
+    if (this.inputMgr.justPressed('interact') && distDesk < 45) {
+      this._sitAtDesk();
+      return;
+    }
+
+    this.inputMgr.clearJustPressed();
+  }
+
+  _triggerBotGreeting() {
+    this.botGreeted = true;
+    this.frozen = true;
+    this.movement.stop();
+
+    // Bot slides toward player
+    this.tweens.add({
+      targets: this.bot,
+      x: this.player.x + 40,
+      y: this.player.y,
+      duration: 400,
+      ease: 'Quad.easeOut',
+      onComplete: () => {
+        this.dialogue.startSequence(dialogueData.office.greeting, {
+          onComplete: () => {
+            // Bot moves aside (up and away)
+            this.tweens.add({
+              targets: this.bot,
+              y: this.bot.y - 60,
+              alpha: 0.4,
+              duration: 600,
+              onComplete: () => {
+                this.frozen = false;
+                this.objectiveText.setText('🎯 Sit at your desk');
+              },
+            });
+          },
+        });
+      },
+    });
+  }
+
+  _sitAtDesk() {
+    this.frozen = true;
+    this.seated = true;
+    this.movement.stop();
+    this.deskIndicator.group.setVisible(false);
+    this.objectiveBg.setVisible(false);
+    this.objectiveText.setVisible(false);
+
+    // Snap player to desk position
+    this.tweens.add({
+      targets: this.player,
+      x: this.deskX,
+      y: this.deskY - 20,
+      duration: 300,
+      onComplete: () => {
+        // Face down (sitting at desk)
+        this.player.anims.play('nikita-dressed-idle-down');
+        // Sync shadow
+        this.playerShadow.setPosition(this.deskX, this.deskY + 2);
+        // Start the existing scripted work sequence
+        this.time.delayedCall(500, () => this._nextStep());
+      },
+    });
   }
 
   _nextStep() {
@@ -368,5 +522,21 @@ export class OfficeScene extends Phaser.Scene {
         difficulty: 'easy',
       });
     });
+  }
+
+  _createSpaceIndicator(x, y) {
+    const bg = this.add.rectangle(x, y, 56, 18, 0x000000, 0.5).setDepth(899);
+    const border = this.add.rectangle(x, y, 56, 18)
+      .setStrokeStyle(1, 0xccaa44, 0.6).setFillStyle(0, 0).setDepth(899);
+    const text = this.add.text(x, y, '⌨ SPACE', {
+      fontSize: '9px', color: '#ccaa44', fontFamily: 'monospace',
+    }).setOrigin(0.5).setDepth(900);
+    const group = this.add.container(0, 0, [bg, border, text]).setDepth(899);
+    group.setVisible(false);
+    this.tweens.add({
+      targets: group, alpha: { from: 0.5, to: 1 },
+      y: { from: 0, to: -3 }, yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut',
+    });
+    return { group };
   }
 }
