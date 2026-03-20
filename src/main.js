@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.js';
 import { TitleScene } from './scenes/TitleScene.js';
 import { IntroCrawlScene } from './scenes/IntroCrawlScene.js';
+import { ControlsScene } from './scenes/ControlsScene.js';
 import { BedroomScene } from './scenes/BedroomScene.js';
 import { KitchenScene } from './scenes/KitchenScene.js';
 import { DrivingScene } from './scenes/DrivingScene.js';
@@ -31,6 +32,7 @@ const config = {
     BootScene,
     TitleScene,
     IntroCrawlScene,
+    ControlsScene,
     BedroomScene,
     KitchenScene,
     DrivingScene,

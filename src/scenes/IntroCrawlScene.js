@@ -170,6 +170,6 @@ export class IntroCrawlScene extends Phaser.Scene {
     if (this.crawlComplete) return;
     this.crawlComplete = true;
     this.audio.stopMusic();
-    this.transition.fadeToScene('BedroomScene');
+    this.transition.fadeToScene('ControlsScene');
   }
 }
