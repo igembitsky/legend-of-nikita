@@ -41,8 +41,7 @@ export class AtmosphereManager {
       vignette: { radius: 0.95, strength: 0.15 },
     },
     office: {
-      vignette: { radius: 0.7, strength: 0.5 },
-      bloom: { color: 0x00ffcc, strength: 0.3, blurStrength: 0.8 },
+      bloom: { color: 0x00ffcc, strength: 0.2, blurStrength: 0.4 },
     },
     home: {
       vignette: { radius: 0.85, strength: 0.35 },
